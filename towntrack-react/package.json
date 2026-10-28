@@ -23,6 +23,7 @@
     "@capacitor/inappbrowser": "^4.0.4",
     "@capacitor/ios": "^8.5.3",
     "@line/liff": "^2.31.2",
+    "@neondatabase/serverless": "^1.2.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.468.0",
     "react": "^19.2.0",
