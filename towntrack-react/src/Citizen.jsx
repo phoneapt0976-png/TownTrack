@@ -66,21 +66,21 @@ const CATEGORY_OPTIONS = [
 
 function VoteFollow({ issue, compact = false }) {
   const { act, busy, actor } = useStore(),
-    voted = issue.voters.includes(actor.id),
-    followed = issue.followers.includes(actor.id);
+    voted = issue?.voters?.includes(actor.id) || false,
+    followed = issue?.followers?.includes(actor.id) || false;
   return (
     <div className={cx("vote-follow", compact && "compact")}>
       <Button
         variant="secondary"
-        disabled={busy || voted || issue.status === "CLOSED"}
+        disabled={busy || voted || issue?.status === "CLOSED"}
         onClick={() =>
           act("VOTE", issue, {}, "โหวตสำเร็จ ขอบคุณที่ช่วยยืนยันปัญหา")
         }
-        aria-label={"โหวต " + issue.id}
+        aria-label={"โหวต " + (issue?.id || "")}
       >
         <ThumbsUp size={15} />
-        {voted ? "โหวตแล้ว" : compact ? issue.votes : "กดโหวต (+1)"}
-        {!compact && <span className="vote-number">{issue.votes}</span>}
+        {voted ? "โหวตแล้ว" : compact ? issue?.votes || 0 : "กดโหวต (+1)"}
+        {!compact && <span className="vote-number">{issue?.votes || 0}</span>}
       </Button>
       <Button
         variant={followed ? "ghost" : "secondary"}
@@ -93,7 +93,7 @@ function VoteFollow({ issue, compact = false }) {
             followed ? "ยกเลิกติดตามแล้ว" : "ติดตามปัญหานี้แล้ว",
           )
         }
-        aria-label={"ติดตาม " + issue.id}
+        aria-label={"ติดตาม " + (issue?.id || "")}
       >
         {followed ? <BellRing size={15} /> : <Bell size={15} />}
         <span>{followed ? "ติดตามแล้ว" : "ติดตามปัญหานี้"}</span>
@@ -119,8 +119,8 @@ function SatisfactionModal({ issue, onClose }) {
   return (
     <Modal title="ประเมินความพึงพอใจ" onClose={onClose}>
       <form className="satisfaction-form" onSubmit={submitModal}>
-        <span className="satisfaction-kicker">เรื่องปิดแล้ว · {issue.id}</span>
-        <h3>{issue.title}</h3>
+        <span className="satisfaction-kicker">เรื่องปิดแล้ว · {issue?.id}</span>
+        <h3>{issue?.title}</h3>
         <p>การแก้ไขปัญหาเรื่องนี้ตรงกับความคาดหวังของคุณแค่ไหน</p>
         <fieldset>
           <legend>ให้คะแนนความพึงพอใจ <span aria-hidden="true">*</span></legend>
@@ -162,14 +162,14 @@ function SatisfactionModal({ issue, onClose }) {
 function CitizenCorrectionForm({ issue, onClose }) {
   const { act, busy, notify } = useStore();
   const [data, setData] = useState({
-    title: issue.title || "",
-    description: issue.description || "",
-    place: issue.place || "",
-    phone: issue.phone || "",
-    reporterName: issue.reporterName || "",
+    title: issue?.title || "",
+    description: issue?.description || "",
+    place: issue?.place || "",
+    phone: issue?.phone || "",
+    reporterName: issue?.reporterName || "",
   });
   const [media, setMedia] = useState([]);
-  const deadline = issue.citizenEditDeadline
+  const deadline = issue?.citizenEditDeadline
     ? new Intl.DateTimeFormat(getLanguage() === "en" ? "en-GB" : "th-TH", {
         dateStyle: "long",
         timeStyle: "short",
@@ -179,11 +179,11 @@ function CitizenCorrectionForm({ issue, onClose }) {
   return (
     <Modal title="แก้ไขและส่งข้อมูลเพิ่มเติม" onClose={onClose}>
       <p className="muted mb-3">
-        {issue.id} · {issue.title}
+        {issue?.id} · {issue?.title}
       </p>
       <div className="citizen-correction-request">
         <strong>ข้อมูลที่เจ้าหน้าที่ขอ</strong>
-        <p>{issue.requestedInfo || "โปรดตรวจสอบและเติมข้อมูลให้ครบถ้วน"}</p>
+        <p>{issue?.requestedInfo || "โปรดตรวจสอบและเติมข้อมูลให้ครบถ้วน"}</p>
         <small>ส่งแก้ไขได้ถึง {deadline} · ภายใน 7 วัน</small>
       </div>
       <form
@@ -245,12 +245,12 @@ function CitizenCorrectionForm({ issue, onClose }) {
             onChange={(event) => set("phone", event.target.value)}
           />
         </Field>
-        {issue.media.length < 5 ? (
+        {issue?.media?.length < 5 ? (
           <Uploader
             files={media}
             onChange={setMedia}
             label="เพิ่มรูปหรือวิดีโอประกอบ"
-            maxFiles={5 - issue.media.length}
+            maxFiles={5 - (issue?.media?.length || 0)}
           />
         ) : (
           <p className="muted text-sm">
@@ -378,7 +378,7 @@ function CitizenNav({ page, go, open, setOpen }) {
 }
 
 export default function Citizen({ navOpen, setNavOpen }) {
-  const { db, act, busy, notify, actor, citizenIdentity } = useStore();
+  const { act, busy, notify, actor, citizenIdentity } = useStore();
   const geo = useGeolocation();
   const locate = async () => {
     const position = await geo.request();
@@ -394,6 +394,10 @@ export default function Citizen({ navOpen, setNavOpen }) {
     [detailFrom, setDetailFrom] = useState("portal"),
     [search, setSearch] = useState(""),
     [trackPage, setTrackPage] = useState(1);
+
+  // ดึงข้อมูลจริงจาก Neon โดยตรง
+  const [neonIssues, setNeonIssues] = useState([]);
+
   const [form, setForm] = useState({
       category: "ไฟฟ้าส่องสว่าง",
       phone: "",
@@ -407,10 +411,12 @@ export default function Citizen({ navOpen, setNavOpen }) {
     [receipt, setReceipt] = useState(null);
   const [correcting, setCorrecting] = useState(false);
   const [ratingIssueId, setRatingIssueId] = useState(null);
+
   useEffect(() => {
     if (geo.source === "gps")
       setForm((f) => ({ ...f, location: geo.location }));
   }, [geo.location, geo.source]);
+
   useEffect(() => {
     if (citizenIdentity?.displayName)
       setForm((f) => ({
@@ -418,53 +424,99 @@ export default function Citizen({ navOpen, setNavOpen }) {
         reporterName: f.reporterName || citizenIdentity.displayName,
       }));
   }, [citizenIdentity?.displayName]);
+
+  // โหลดข้อมูลจริงจากตาราง reports ใน Neon
+  useEffect(() => {
+    const fetchNeonReports = async () => {
+      try {
+        const { neon } = await import('@neondatabase/serverless');
+        const sql = neon("postgresql://neondb_owner:npg_HmAiMfy2qU5N@ep-noisy-truth-b5sf63d2-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require");
+        
+        const rows = await sql`SELECT * FROM reports ORDER BY created_at DESC`;
+        
+        const formatted = rows.map((r) => ({
+          id: "REQ-" + r.id,
+          title: r.title || "แจ้งปัญหาทั่วไป",
+          description: r.description || "",
+          place: r.location || "ไม่ระบุสถานที่",
+          category: r.title || "ทั่วไป",
+          status: r.status || "NEW",
+          reportedBy: r.citizen_id || actor.id,
+          reporterName: "ประชาชน",
+          phone: "",
+          followers: [],
+          voters: [],
+          votes: 1,
+          updatedAt: r.created_at || new Date().toISOString(),
+          createdAt: r.created_at || new Date().toISOString(),
+          media: [],
+          satisfaction: [],
+          location: USER_LOCATION,
+          timeline: [
+            { status: "NEW", title: "รับแจ้งเรื่องเข้าสู่ระบบ", time: r.created_at || new Date().toISOString() }
+          ]
+        }));
+
+        setNeonIssues(formatted);
+      } catch (err) {
+        console.error("Failed to fetch reports from Neon:", err);
+      }
+    };
+
+    fetchNeonReports();
+  }, [page, actor.id]);
+
   const update = (key, value) => setForm((f) => ({ ...f, [key]: value }));
+  
   const open = (i) => {
     setDetailFrom(page);
     setSelected(i.id);
     setPage("detail");
-    if (page === "tracking" && i.status === "CLOSED" &&
-        (i.reportedBy === actor.id || i.followers.includes(actor.id)) &&
-        !i.satisfaction?.some((entry) => entry.actorId === actor.id)) {
-      setRatingIssueId(i.id);
-    }
   };
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [page]);
-  const issue = db.issues.find((i) => i.id === selected);
-  const near = nearby(db.issues, form.location);
+
+  // ดึงข้อมูลตัวที่เลือกจาก Neon ตรงๆ
+  const issue = neonIssues.find((i) => i.id === selected) || {
+    id: selected || "REQ-0000",
+    title: "กำลังโหลด...",
+    description: "",
+    place: "",
+    category: "ทั่วไป",
+    status: "NEW",
+    reportedBy: actor.id,
+    followers: [],
+    voters: [],
+    votes: 0,
+    updatedAt: new Date().toISOString(),
+    media: [],
+    satisfaction: [],
+    timeline: []
+  };
+
+  const near = nearby(neonIssues, form.location);
+  
   const go = (p) => {
     setPage(p);
     setSelected(null);
   };
-  const trackingScope = useMemo(() => db.issues.filter((i) =>
-    trackTab === "mine" ? i.reportedBy === actor.id : i.followers.includes(actor.id)
-  ), [db.issues, trackTab, actor.id]);
-  const needsRating = (i) => i.status === "CLOSED" &&
-    !i.satisfaction?.some((rating) => rating.actorId === actor.id);
-  const hasRated = (i) => i.status === "CLOSED" &&
-    i.satisfaction?.some((rating) => rating.actorId === actor.id);
-  const trackingCounts = {
-    all: trackingScope.length,
-    active: trackingScope.filter((i) => i.status !== "CLOSED").length,
-    closed: trackingScope.filter(needsRating).length,
-    rated: trackingScope.filter(hasRated).length,
-  };
+
+  const trackingScope = useMemo(() => neonIssues, [neonIssues]);
+
   const trackedIssues = trackingScope.filter((i) => {
-    const matchesStatus = trackStatus === "all" ||
-      (trackStatus === "active" && i.status !== "CLOSED") ||
-      (trackStatus === "closed" && needsRating(i)) ||
-      (trackStatus === "rated" && hasRated(i));
-    return matchesStatus && [i.title, i.id].join(" ").toLowerCase().includes(search.toLowerCase());
+    return [i.title, i.id, i.place].join(" ").toLowerCase().includes(search.toLowerCase());
   }).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+
   const trackPages = Math.max(1, Math.ceil(trackedIssues.length / 5));
+  
   useEffect(() => setTrackPage(1), [trackTab, trackStatus, search]);
   useEffect(() => {
     if (trackPage > trackPages) setTrackPage(trackPages);
   }, [trackPage, trackPages]);
 
-  // ฟังก์ชันส่งข้อมูลเข้า Neon ฐานข้อมูลโดยตรง
+  // ฟังก์ชันส่งข้อมูลเข้า Neon ฐานข้อมูลจริง
   const submit = async (event) => {
     event.preventDefault();
     if (!form.description.trim()) {
@@ -484,10 +536,9 @@ export default function Citizen({ navOpen, setNavOpen }) {
 
     try {
       const { neon } = await import('@neondatabase/serverless');
-      // ⚠️ นำลิงก์เชื่อมต่อ Neon ของคุณมาใส่แทนข้อความด้านล่างนี้ (เช่น "postgresql://...")
       const sql = neon("postgresql://neondb_owner:npg_HmAiMfy2qU5N@ep-noisy-truth-b5sf63d2-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require");
 
-      await sql`
+      const result = await sql`
         INSERT INTO reports (title, description, location, citizen_id)
         VALUES (
           ${form.title || form.category}, 
@@ -495,11 +546,12 @@ export default function Citizen({ navOpen, setNavOpen }) {
           ${form.place}, 
           ${actor.id}
         )
+        RETURNING id
       `;
 
       notify("ส่งคำร้องสำเร็จ ข้อมูลบันทึกลง Neon เรียบร้อย!");
-      const fakeId = "REQ-" + Math.floor(1000 + Math.random() * 9000);
-      setReceipt(fakeId);
+      const newId = "REQ-" + (result[0]?.id || Math.floor(1000 + Math.random() * 9000));
+      setReceipt(newId);
       setPage("receipt");
       setMedia([]);
       setForm({ ...form, title: "", description: "" });
@@ -544,244 +596,97 @@ export default function Citizen({ navOpen, setNavOpen }) {
       {locationNotice}
       <div className="citizen-wrap">
         <div className="phone-frame">
-        <div className="citizen-header">
-          <a className="municipal-mark" href="/citizen" aria-label="TownTrack · กลับหน้าหลักประชาชน">ท</a>
-          <div>
-            <a href="/citizen" aria-label="TownTrack · กลับหน้าหลักประชาชน" style={{ color: "inherit", textDecoration: "none", display: "inline-flex", alignItems: "center", minHeight: 44 }}><strong>TownTrack</strong></a>
-            <small>
-              {citizenIdentity
-                ? `LINE OA · ${citizenIdentity.displayName || "ยืนยันตัวตนแล้ว"}`
-                : MUNICIPALITY}
-            </small>
+          <div className="citizen-header">
+            <a className="municipal-mark" href="/citizen" aria-label="TownTrack · กลับหน้าหลักประชาชน">ท</a>
+            <div>
+              <a href="/citizen" aria-label="TownTrack · กลับหน้าหลักประชาชน" style={{ color: "inherit", textDecoration: "none", display: "inline-flex", alignItems: "center", minHeight: 44 }}><strong>TownTrack</strong></a>
+              <small>
+                {citizenIdentity
+                  ? `LINE OA · ${citizenIdentity.displayName || "ยืนยันตัวตนแล้ว"}`
+                  : MUNICIPALITY}
+              </small>
+            </div>
+            <button
+              className="icon-btn citizen-bell"
+              aria-label="ดูเรื่องที่ติดตาม"
+              onClick={() => {
+                setTrackTab("follow");
+                go("tracking");
+              }}
+            >
+              <Bell size={20} />
+              <i />
+            </button>
           </div>
-          <button
-            className="icon-btn citizen-bell"
-            aria-label="ดูเรื่องที่ติดตาม"
-            onClick={() => {
-              setTrackTab("follow");
-              go("tracking");
-            }}
-          >
-            <Bell size={20} />
-            <i />
-          </button>
-        </div>
-        {!['portal', 'emergency'].includes(page) && (
-          <nav className="citizen-flow" aria-label="ขั้นตอนแจ้งและติดตามปัญหา">
-            {[
-              ["nearby", "เช็กเรื่องซ้ำ"],
-              ["form", "แจ้งปัญหา"],
-              ["receipt", "ติดตาม/แก้ไข"],
-            ].map(([step, label], index) => {
-              const activeStep = ["nearby"].includes(page)
-                ? 0
-                : ["form"].includes(page)
-                  ? 1
-                  : 2;
-              const complete = index < activeStep;
-              return (
-                <div
-                  key={step}
-                  className={cx(
-                    "citizen-flow-step",
-                    index === activeStep && "is-active",
-                    complete && "is-complete",
-                  )}
-                  aria-current={index === activeStep ? "step" : undefined}
-                >
-                  <span>{complete ? <Check size={14} /> : index + 1}</span>
-                  <strong>{label}</strong>
-                </div>
-              );
-            })}
-          </nav>
-        )}
-        <div className={cx("citizen-body", "citizen-page-" + page)}>
-          {page === "nearby" && (
-            <>
-              <button className="back-link" onClick={() => go("portal")}>
-                <ArrowLeft size={16} />
-                กลับหน้าหลัก
-              </button>
-              <span className="eyebrow">ก่อนแจ้งปัญหา</span>
-              <h1>ตรวจปัญหาใกล้จุดเกิดเหตุ</h1>
-              <p className="muted">
-                ดูเรื่องในระยะ 100 เมตร
-                <br />
-                เพื่อช่วยลดการแจ้งซ้ำ
-              </p>
-              <div className="gps-box">
-                <LocateFixed size={18} />
-                <div>
-                  <strong>
-                    {geo.source === "gps" &&
-                    distance(form.location, geo.location) < 1
-                      ? "พิกัดจาก GPS ของคุณ"
-                      : distance(form.location, USER_LOCATION) > 1
-                        ? "จุดเกิดเหตุที่เลือกบนแผนที่"
-                        : "จุดอ้างอิงเทศบาล · ยังไม่ได้ใช้ GPS"}
-                  </strong>
-                  <small>
-                    {form.location.lat.toFixed(6)},{" "}
-                    {form.location.lng.toFixed(6)}
-                    {geo.accuracy
-                      ? " · ความแม่นยำประมาณ " +
-                        Math.round(geo.accuracy) +
-                        " ม."
-                      : ""}
-                  </small>
-                </div>
-              </div>
-              <Button
-                variant="secondary"
-                className="w-full mb-3"
-                disabled={geo.pending}
-                onClick={locate}
-              >
-                <LocateFixed size={15} />
-                {geo.pending ? "กำลังหาตำแหน่ง…" : "ใช้ GPS ของฉัน"}
-              </Button>
-              {geo.error && (
-                <p className="gps-error" role="alert">
-                  {geo.error}
-                </p>
-              )}
-              <GeoMap
-                issues={near}
-                center={form.location}
-                radar
-                onSelect={open}
-                onPick={(p) => update("location", p)}
-              />
-              <div className="section-title mt-5">
-                <strong>พบ {near.length} ปัญหาใกล้คุณ</strong>
-                <span className="muted text-xs">ภายใน 100 เมตร</span>
-              </div>
-              {near.length ? (
-                near.map((i) => (
-                  <article className="nearby-card" key={i.id}>
-                    <div className="flex justify-between items-center">
-                      <span className="case-id">{i.id}</span>
-                      <span className="distance-label">
-                        <Navigation size={11} />
-                        {Math.round(distance(i.location, form.location))} เมตร
-                      </span>
-                    </div>
-                    <h3>{i.title}</h3>
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      <span className="category-tag">{i.category}</span>
-                      <Badge issue={i} />
-                    </div>
-                    <VoteFollow issue={i} />
-                  </article>
-                ))
-              ) : (
-                <Empty
-                  title="ยังไม่พบปัญหาใกล้จุดนี้"
-                  text="คุณสามารถแจ้งคำร้องใหม่ได้"
-                />
-              )}
-              <Button className="w-full mt-4" onClick={() => go("form")}>
-                ไม่พบเรื่องนี้? แจ้งปัญหาใหม่
-                <ArrowRight size={16} />
-              </Button>
-            </>
-          )}
-          {page === "form" && (
-            <>
-              <button className="back-link" onClick={() => go("nearby")}>
-                <ArrowLeft size={16} />
-                กลับไปดูปัญหาใกล้ตัว
-              </button>
-              <span className="eyebrow">คำร้องใหม่</span>
-              <h1>แจ้งปัญหา</h1>
-              <p className="muted mb-5">
-                บอกข้อมูลให้ครบ เพื่อให้เจ้าหน้าที่ช่วยได้เร็วขึ้น
-              </p>
-              <form className="form-stack" onSubmit={submit}>
-                <fieldset className="category-picker">
-                  <legend>
-                    ประเภทปัญหา <b aria-hidden="true">*</b>
-                  </legend>
-                  <div className="category-option-grid">
-                    {CATEGORY_OPTIONS.map(({ value, label, Icon }) => (
-                      <button
-                        key={value}
-                        type="button"
-                        className={cx(
-                          "category-option",
-                          form.category === value && "selected",
-                        )}
-                        aria-pressed={form.category === value}
-                        aria-label={`เลือกประเภท ${label}`}
-                        onClick={() => update("category", value)}
-                      >
-                        <Icon size={20} aria-hidden="true" />
-                        <span>{label}</span>
-                      </button>
-                    ))}
+          {!['portal', 'emergency'].includes(page) && (
+            <nav className="citizen-flow" aria-label="ขั้นตอนแจ้งและติดตามปัญหา">
+              {[
+                ["nearby", "เช็กเรื่องซ้ำ"],
+                ["form", "แจ้งปัญหา"],
+                ["receipt", "ติดตาม/แก้ไข"],
+              ].map(([step, label], index) => {
+                const activeStep = ["nearby"].includes(page)
+                  ? 0
+                  : ["form"].includes(page)
+                    ? 1
+                    : 2;
+                const complete = index < activeStep;
+                return (
+                  <div
+                    key={step}
+                    className={cx(
+                      "citizen-flow-step",
+                      index === activeStep && "is-active",
+                      complete && "is-complete",
+                    )}
+                    aria-current={index === activeStep ? "step" : undefined}
+                  >
+                    <span>{complete ? <Check size={14} /> : index + 1}</span>
+                    <strong>{label}</strong>
                   </div>
-                </fieldset>
-                <Field
-                  label="ชื่อเรื่อง"
-                  hint="ไม่บังคับ · เว้นว่างได้"
-                >
-                  <input
-                    value={form.title}
-                    maxLength={100}
-                    onChange={(e) => update("title", e.target.value)}
-                    placeholder="เช่น ไฟส่องสว่างดับท้ายซอย"
-                  />
-                </Field>
-                <Field label="สถานที่เกิดเหตุ" required>
-                  <input
-                    value={form.place}
-                    required
-                    maxLength={200}
-                    onChange={(e) => update("place", e.target.value)}
-                    placeholder="เช่น ซอย 3 หน้าโรงเรียน"
-                  />
-                </Field>
-                <GeoMap
-                  center={form.location}
-                  onPick={(p) => update("location", p)}
-                  radar
-                />
-                <div className="form-grid">
-                  <Field label="ละติจูด">
-                    <input
-                      type="number"
-                      step="any"
-                      min="-90"
-                      max="90"
-                      value={form.location.lat}
-                      onChange={(e) =>
-                        update("location", {
-                          ...form.location,
-                          lat: Number(e.target.value),
-                        })
-                      }
-                    />
-                  </Field>
-                  <Field label="ลองจิจูด">
-                    <input
-                      type="number"
-                      step="any"
-                      min="-180"
-                      max="180"
-                      value={form.location.lng}
-                      onChange={(e) =>
-                        update("location", {
-                          ...form.location,
-                          lng: Number(e.target.value),
-                        })
-                      }
-                    />
-                  </Field>
+                );
+              })}
+            </nav>
+          )}
+          <div className={cx("citizen-body", "citizen-page-" + page)}>
+            {page === "nearby" && (
+              <>
+                <button className="back-link" onClick={() => go("portal")}>
+                  <ArrowLeft size={16} />
+                  กลับหน้าหลัก
+                </button>
+                <span className="eyebrow">ก่อนแจ้งปัญหา</span>
+                <h1>ตรวจปัญหาใกล้จุดเกิดเหตุ</h1>
+                <p className="muted">
+                  ดูเรื่องในระยะ 100 เมตร
+                  <br />
+                  เพื่อช่วยลดการแจ้งซ้ำ
+                </p>
+                <div className="gps-box">
+                  <LocateFixed size={18} />
+                  <div>
+                    <strong>
+                      {geo.source === "gps" &&
+                      distance(form.location, geo.location) < 1
+                        ? "พิกัดจาก GPS ของคุณ"
+                        : distance(form.location, USER_LOCATION) > 1
+                          ? "จุดเกิดเหตุที่เลือกบนแผนที่"
+                          : "จุดอ้างอิงเทศบาล · ยังไม่ได้ใช้ GPS"}
+                    </strong>
+                    <small>
+                      {form.location.lat.toFixed(6)},{" "}
+                      {form.location.lng.toFixed(6)}
+                      {geo.accuracy
+                        ? " · ความแม่นยำประมาณ " +
+                          Math.round(geo.accuracy) +
+                          " ม."
+                        : ""}
+                    </small>
+                  </div>
                 </div>
                 <Button
-                  type="button"
-                  variant="ghost"
+                  variant="secondary"
+                  className="w-full mb-3"
                   disabled={geo.pending}
                   onClick={locate}
                 >
@@ -793,286 +698,426 @@ export default function Citizen({ navOpen, setNavOpen }) {
                     {geo.error}
                   </p>
                 )}
-                <Field label="ชื่อ–นามสกุล" hint="ไม่บังคับ">
-                  <input
-                    value={form.reporterName}
-                    maxLength={100}
-                    onChange={(e) => update("reporterName", e.target.value)}
-                    autoComplete="name"
-                  />
-                </Field>
-                <Field
-                  label="เบอร์โทรศัพท์"
-                  hint="ไม่บังคับ · สำหรับติดต่อกลับ"
-                >
-                  <input
-                    type="tel"
-                    value={form.phone}
-                    onChange={(e) => update("phone", e.target.value)}
-                    placeholder="เช่น 0812345678"
-                    autoComplete="tel"
-                  />
-                </Field>
-                <Field label="รายละเอียดปัญหา" required>
-                  <textarea
-                    value={form.description}
-                    onChange={(e) => update("description", e.target.value)}
-                    required
-                    maxLength={1500}
-                    rows={4}
-                    placeholder="เกิดอะไรขึ้น และกระทบคนในพื้นที่อย่างไร"
-                  />
-                </Field>
-                <Uploader
-                  files={media}
-                  onChange={setMedia}
-                  required
-                  label="แนบรูปหรือวิดีโออย่างน้อย 1 ไฟล์"
+                <GeoMap
+                  issues={near}
+                  center={form.location}
+                  radar
+                  onSelect={open}
+                  onPick={(p) => update("location", p)}
                 />
-                <PrivacyNotice />
-                <div className="form-grid">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    disabled={busy}
-                    onClick={() => go("portal")}
-                  >
-                    ยกเลิก
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={busy}
-                  >
-                    <Send size={16} />
-                    {busy ? "กำลังส่ง…" : "ยืนยันส่งข้อมูล"}
-                  </Button>
+                <div className="section-title mt-5">
+                  <strong>พบ {near.length} ปัญหาใกล้คุณ</strong>
+                  <span className="muted text-xs">ภายใน 100 เมตร</span>
                 </div>
-              </form>
-            </>
-          )}
-          {page === "receipt" && (
-            <div className="receipt">
-              <div className="receipt-check">
-                <CheckCircle2 size={44} />
-              </div>
-              <span className="eyebrow">บันทึกคำร้องแล้ว</span>
-              <h1>ขอบคุณที่ช่วยดูแลชุมชน</h1>
-              <p>หมายเลขคำร้องของคุณ</p>
-              <strong className="receipt-id">{receipt}</strong>
-              <p className="muted">
-                คุณสามารถดูสถานะและประวัติ
-                <br />
-                ได้จากหน้าติดตามความคืบหน้า
-              </p>
-              <Button
-                onClick={() => {
-                  setSelected(receipt);
-                  setPage("detail");
-                }}
-                className="w-full"
-              >
-                <ClipboardList size={17} />
-                ติดตามคำร้องนี้
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => go("portal")}
-                className="w-full"
-              >
-                กลับหน้าหลัก
-              </Button>
-            </div>
-          )}
-          {page === "tracking" && (
-            <>
-              <span className="eyebrow">ทุกเรื่องมีความคืบหน้า</span>
-              <h1>ติดตามสถานะปัญหา</h1>
-              <div className="segmented">
-                <button
-                  aria-pressed={trackTab === "mine"}
-                  className={trackTab === "mine" ? "active" : ""}
-                  onClick={() => setTrackTab("mine")}
-                >
-                  เรื่องที่ฉันแจ้งเอง
+                {near.length ? (
+                  near.map((i) => (
+                    <article className="nearby-card" key={i.id}>
+                      <div className="flex justify-between items-center">
+                        <span className="case-id">{i.id}</span>
+                        <span className="distance-label">
+                          <Navigation size={11} />
+                          {Math.round(distance(i.location, form.location))} เมตร
+                        </span>
+                      </div>
+                      <h3>{i.title}</h3>
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        <span className="category-tag">{i.category}</span>
+                        <Badge issue={i} />
+                      </div>
+                      <VoteFollow issue={i} />
+                    </article>
+                  ))
+                ) : (
+                  <Empty
+                    title="ยังไม่พบปัญหาใกล้จุดนี้"
+                    text="คุณสามารถแจ้งคำร้องใหม่ได้"
+                  />
+                )}
+                <Button className="w-full mt-4" onClick={() => go("form")}>
+                  ไม่พบเรื่องนี้? แจ้งปัญหาใหม่
+                  <ArrowRight size={16} />
+                </Button>
+              </>
+            )}
+            {page === "form" && (
+              <>
+                <button className="back-link" onClick={() => go("nearby")}>
+                  <ArrowLeft size={16} />
+                  กลับไปดูปัญหาใกล้ตัว
                 </button>
-                <button
-                  aria-pressed={trackTab === "follow"}
-                  className={trackTab === "follow" ? "active" : ""}
-                  onClick={() => setTrackTab("follow")}
-                >
-                  เรื่องที่ติดตาม
-                </button>
-              </div>
-              <div className="tracking-status-filters" role="group" aria-label="กรองสถานะเรื่องที่ติดตาม">
-                {[["all", "ทั้งหมด"], ["active", "กำลังดำเนินการ"], ["closed", "ปิดเรื่องแล้ว"], ["rated", "ประเมินแล้ว"]].map(([value, label]) => (
-                  <button type="button" key={value} aria-pressed={trackStatus === value}
-                    onClick={() => setTrackStatus(value)}>
-                    <span>{label}</span><strong>{trackingCounts[value]}</strong>
-                  </button>
-                ))}
-              </div>
-              <p className="tracking-status-help">เลือก “ปิดเรื่องแล้ว” แล้วกดเรื่องเพื่อประเมินความพึงพอใจ เรื่องที่ให้คะแนนแล้วดูได้ใน “ประเมินแล้ว”</p>
-              <div className="search-input">
-                <Search size={16} />
-                <input
-                  aria-label="ค้นหาชื่อเรื่องหรือเลขคำร้อง"
-                  placeholder="ค้นหาชื่อเรื่องหรือเลขคำร้อง"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
-              <div className="tracking-grid">
-                {trackedIssues
-                  .slice((trackPage - 1) * 5, trackPage * 5)
-                  .map((i) => (
-                  <button
-                    className={cx("tracking-card", i.status === "CLOSED" && "tracking-card-closed")}
-                    key={i.id}
-                    onClick={() => open(i)}
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="case-id">{i.id}</span>
-                      <Badge issue={i} />
-                    </div>
-                    <h3>{i.title}</h3>
-                    <small>{i.place}</small>
-                    {i.reportedBy === actor.id && i.status === "NEEDS_INFO" && (
-                      <small className="tracking-needs-info">
-                        รอข้อมูลจากคุณ · แตะเพื่อแก้ไข
-                      </small>
-                    )}
-                    {i.status === "CLOSED" && (
-                      <small className="tracking-rating-hint">
-                        {i.satisfaction?.some((entry) => entry.actorId === actor.id)
-                          ? `ประเมินแล้ว · ${i.satisfaction.find((entry) => entry.actorId === actor.id).score}/5 คะแนน`
-                          : "ปิดเรื่องแล้ว · แตะเพื่อประเมินความพึงพอใจ"}
-                      </small>
-                    )}
-                    <div className="mini-progress">
-                      {[
-                        "NEW",
-                        "RECEIVED",
-                        "IN_PROGRESS",
-                        "STAFF_REVIEW",
-                        "CLOSED",
-                      ].map((s, n) => (
-                        <span
-                          key={s}
-                          className={n <= stageOf(i.status) ? "filled" : ""}
-                        />
+                <span className="eyebrow">คำร้องใหม่</span>
+                <h1>แจ้งปัญหา</h1>
+                <p className="muted mb-5">
+                  บอกข้อมูลให้ครบ เพื่อให้เจ้าหน้าที่ช่วยได้เร็วขึ้น
+                </p>
+                <form className="form-stack" onSubmit={submit}>
+                  <fieldset className="category-picker">
+                    <legend>
+                      ประเภทปัญหา <b aria-hidden="true">*</b>
+                    </legend>
+                    <div className="category-option-grid">
+                      {CATEGORY_OPTIONS.map(({ value, label, Icon }) => (
+                        <button
+                          key={value}
+                          type="button"
+                          className={cx(
+                            "category-option",
+                            form.category === value && "selected",
+                          )}
+                          aria-pressed={form.category === value}
+                          aria-label={`เลือกประเภท ${label}`}
+                          onClick={() => update("category", value)}
+                        >
+                          <Icon size={20} aria-hidden="true" />
+                          <span>{label}</span>
+                        </button>
                       ))}
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="muted text-xs">{date(i.updatedAt)}</span>
-                      <ChevronRight size={15} />
-                    </div>
-                  </button>
-                  ))}
-              </div>
-              {!trackedIssues.length && (
-                <Empty
-                  title={
-                    trackStatus !== "all" || search ? "ไม่พบเรื่องตามเงื่อนไขที่เลือก" : trackTab === "mine"
-                      ? "ยังไม่มีเรื่องที่คุณแจ้ง"
-                      : "ยังไม่ได้ติดตามปัญหา"
-                  }
-                  text={trackStatus !== "all" || search ? "ลองเลือกสถานะทั้งหมด หรือเปลี่ยนคำค้นหา" : "เริ่มจากหน้าหลัก หรือเลือกติดตามปัญหาที่พบ"}
-                />
-              )}
-              {trackedIssues.length > 5 && (
-                <nav className="pagination" aria-label="หน้ารายการติดตาม">
-                  <button
-                    aria-label="หน้าก่อนหน้า"
-                    disabled={trackPage === 1}
-                    onClick={() => setTrackPage((n) => Math.max(1, n - 1))}
+                  </fieldset>
+                  <Field
+                    label="ชื่อเรื่อง"
+                    hint="ไม่บังคับ · เว้นว่างได้"
                   >
-                    <ArrowLeft size={15} />
-                  </button>
-                  {Array.from({ length: trackPages }, (_, n) => n + 1)
-                    .filter(
-                      (n) =>
-                        n === 1 ||
-                        n === trackPages ||
-                        Math.abs(n - trackPage) <= 1,
-                    )
-                    .map((n, index, visible) => (
-                      <React.Fragment key={n}>
-                        {index > 0 && n - visible[index - 1] > 1 && (
-                          <span aria-hidden="true">…</span>
-                        )}
-                        <button
-                          aria-label={`หน้า ${n}`}
-                          aria-current={trackPage === n ? "page" : undefined}
-                          onClick={() => setTrackPage(n)}
-                        >
-                          {n}
-                        </button>
-                      </React.Fragment>
-                    ))}
-                  <button
-                    aria-label="หน้าถัดไป"
-                    disabled={trackPage === trackPages}
-                    onClick={() =>
-                      setTrackPage((n) => Math.min(trackPages, n + 1))
-                    }
+                    <input
+                      value={form.title}
+                      maxLength={100}
+                      onChange={(e) => update("title", e.target.value)}
+                      placeholder="เช่น ไฟส่องสว่างดับท้ายซอย"
+                    />
+                  </Field>
+                  <Field label="สถานที่เกิดเหตุ" required>
+                    <input
+                      value={form.place}
+                      required
+                      maxLength={200}
+                      onChange={(e) => update("place", e.target.value)}
+                      placeholder="เช่น ซอย 3 หน้าโรงเรียน"
+                    />
+                  </Field>
+                  <GeoMap
+                    center={form.location}
+                    onPick={(p) => update("location", p)}
+                    radar
+                  />
+                  <div className="form-grid">
+                    <Field label="ละติจูด">
+                      <input
+                        type="number"
+                        step="any"
+                        min="-90"
+                        max="90"
+                        value={form.location.lat}
+                        onChange={(e) =>
+                          update("location", {
+                            ...form.location,
+                            lat: Number(e.target.value),
+                          })
+                        }
+                      />
+                    </Field>
+                    <Field label="ลองจิจูด">
+                      <input
+                        type="number"
+                        step="any"
+                        min="-180"
+                        max="180"
+                        value={form.location.lng}
+                        onChange={(e) =>
+                          update("location", {
+                            ...form.location,
+                            lng: Number(e.target.value),
+                          })
+                        }
+                      />
+                    </Field>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    disabled={geo.pending}
+                    onClick={locate}
                   >
-                    <ArrowRight size={15} />
-                  </button>
-                  <small>
-                    {trackedIssues.length} เรื่อง · หน้า {trackPage}/{trackPages}
-                  </small>
-                </nav>
-              )}
-            </>
-          )}
-          {page === "emergency" && (
-            <EmergencyPage geo={geo} />
-          )}
-          {page === "detail" && issue && (
-            <>
-              <button className="back-link" onClick={() => go(detailFrom)}>
-                <ArrowLeft size={16} />
-                กลับรายการ
-              </button>
-              <IssueSummary issue={publicIssue(issue)} />
-              {issue.status === "CLOSED" &&
-                (issue.reportedBy === actor.id || issue.followers.includes(actor.id)) && (
-                <section className="satisfaction-detail" aria-label="ความพึงพอใจต่อเรื่องนี้">
-                  <Star size={22} aria-hidden="true" />
-                  <div>
-                    <strong>การประเมินความพึงพอใจ</strong>
-                    <p>{issue.satisfaction?.some((entry) => entry.actorId === actor.id)
-                      ? `คุณให้ ${issue.satisfaction.find((entry) => entry.actorId === actor.id).score} จาก 5 คะแนนแล้ว ขอบคุณสำหรับความคิดเห็น`
-                      : "เรื่องปิดแล้ว ช่วยบอกความเห็นเพื่อปรับปรุงบริการ"}</p>
-                  </div>
-                  {!issue.satisfaction?.some((entry) => entry.actorId === actor.id) && (
-                    <Button variant="secondary" onClick={() => setRatingIssueId(issue.id)}>
-                      ให้คะแนน
-                    </Button>
-                  )}
-                </section>
-              )}
-              {issue.reportedBy === actor.id && issue.status === "NEEDS_INFO" && (
-                <section className="citizen-correction-card" aria-label="แก้ไขคำร้อง">
-                  <div>
-                    <span className="eyebrow">รอข้อมูลจากคุณ</span>
-                    <h2>เจ้าหน้าที่ขอข้อมูลเพิ่มเติม</h2>
-                    <p>{issue.requestedInfo}</p>
-                    <small>
-                      กรุณาส่งภายใน 7 วัน · ปิดเรื่องอัตโนมัติเมื่อพ้นกำหนด
-                    </small>
-                  </div>
-                  <Button onClick={() => setCorrecting(true)}>
-                    แก้ข้อมูลและส่งอีกครั้ง
+                    <LocateFixed size={15} />
+                    {geo.pending ? "กำลังหาตำแหน่ง…" : "ใช้ GPS ของฉัน"}
                   </Button>
-                </section>
-              )}
-              <VoteFollow issue={issue} />
-              <h2 className="mt-6 mb-3">ความคืบหน้า</h2>
-              <Timeline issue={issue} />
-            </>
-          )}
-        </div>
+                  {geo.error && (
+                    <p className="gps-error" role="alert">
+                      {geo.error}
+                    </p>
+                  )}
+                  <Field label="ชื่อ–นามสกุล" hint="ไม่บังคับ">
+                    <input
+                      value={form.reporterName}
+                      maxLength={100}
+                      onChange={(e) => update("reporterName", e.target.value)}
+                      autoComplete="name"
+                    />
+                  </Field>
+                  <Field
+                    label="เบอร์โทรศัพท์"
+                    hint="ไม่บังคับ · สำหรับติดต่อกลับ"
+                  >
+                    <input
+                      type="tel"
+                      value={form.phone}
+                      onChange={(e) => update("phone", e.target.value)}
+                      placeholder="เช่น 0812345678"
+                      autoComplete="tel"
+                    />
+                  </Field>
+                  <Field label="รายละเอียดปัญหา" required>
+                    <textarea
+                      value={form.description}
+                      onChange={(e) => update("description", e.target.value)}
+                      required
+                      maxLength={1500}
+                      rows={4}
+                      placeholder="เกิดอะไรขึ้น และกระทบคนในพื้นที่อย่างไร"
+                    />
+                  </Field>
+                  <Uploader
+                    files={media}
+                    onChange={setMedia}
+                    required
+                    label="แนบรูปหรือวิดีโออย่างน้อย 1 ไฟล์"
+                  />
+                  <PrivacyNotice />
+                  <div className="form-grid">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      disabled={busy}
+                      onClick={() => go("portal")}
+                    >
+                      ยกเลิก
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={busy}
+                    >
+                      <Send size={16} />
+                      {busy ? "กำลังส่ง…" : "ยืนยันส่งข้อมูล"}
+                    </Button>
+                  </div>
+                </form>
+              </>
+            )}
+            {page === "receipt" && (
+              <div className="receipt">
+                <div className="receipt-check">
+                  <CheckCircle2 size={44} />
+                </div>
+                <span className="eyebrow">บันทึกคำร้องแล้ว</span>
+                <h1>ขอบคุณที่ช่วยดูแลชุมชน</h1>
+                <p>หมายเลขคำร้องของคุณ</p>
+                <strong className="receipt-id">{receipt}</strong>
+                <p className="muted">
+                  คุณสามารถดูสถานะและประวัติ
+                  <br />
+                  ได้จากหน้าติดตามความคืบหน้า
+                </p>
+                <Button
+                  onClick={() => {
+                    setSelected(receipt);
+                    setPage("detail");
+                  }}
+                  className="w-full"
+                >
+                  <ClipboardList size={17} />
+                  ติดตามคำร้องนี้
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => go("portal")}
+                  className="w-full"
+                >
+                  กลับหน้าหลัก
+                </Button>
+              </div>
+            )}
+            {page === "tracking" && (
+              <>
+                <span className="eyebrow">ทุกเรื่องมีความคืบหน้า</span>
+                <h1>ติดตามสถานะปัญหา</h1>
+                <div className="search-input">
+                  <Search size={16} />
+                  <input
+                    aria-label="ค้นหาชื่อเรื่องหรือเลขคำร้อง"
+                    placeholder="ค้นหาชื่อเรื่องหรือเลขคำร้อง"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </div>
+                <div className="tracking-grid">
+                  {trackedIssues
+                    .slice((trackPage - 1) * 5, trackPage * 5)
+                    .map((i) => (
+                    <button
+                      className={cx("tracking-card", i.status === "CLOSED" && "tracking-card-closed")}
+                      key={i.id}
+                      onClick={() => open(i)}
+                    >
+                      <div className="flex justify-between items-center">
+                        <span className="case-id">{i.id}</span>
+                        <Badge issue={i} />
+                      </div>
+                      <h3>{i.title}</h3>
+                      <small>{i.place}</small>
+                      {i.reportedBy === actor.id && i.status === "NEEDS_INFO" && (
+                        <small className="tracking-needs-info">
+                          รอข้อมูลจากคุณ · แตะเพื่อแก้ไข
+                        </small>
+                      )}
+                      {i.status === "CLOSED" && (
+                        <small className="tracking-rating-hint">
+                          {i.satisfaction?.some((entry) => entry.actorId === actor.id)
+                            ? `ประเมินแล้ว · ${i.satisfaction.find((entry) => entry.actorId === actor.id).score}/5 คะแนน`
+                            : "ปิดเรื่องแล้ว · แตะเพื่อประเมินความพึงพอใจ"}
+                        </small>
+                      )}
+                      <div className="mini-progress">
+                        {[
+                          "NEW",
+                          "RECEIVED",
+                          "IN_PROGRESS",
+                          "STAFF_REVIEW",
+                          "CLOSED",
+                        ].map((s, n) => (
+                          <span
+                            key={s}
+                            className={n <= stageOf(i.status) ? "filled" : ""}
+                          />
+                        ))}
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="muted text-xs">{date(i.updatedAt)}</span>
+                        <ChevronRight size={15} />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                {!trackedIssues.length && (
+                  <Empty
+                    title={
+                      trackStatus !== "all" || search ? "ไม่พบเรื่องตามเงื่อนไขที่เลือก" : trackTab === "mine"
+                        ? "ยังไม่มีเรื่องที่คุณแจ้ง"
+                        : "ยังไม่ได้ติดตามปัญหา"
+                    }
+                    text={trackStatus !== "all" || search ? "ลองเลือกสถานะทั้งหมด หรือเปลี่ยนคำค้นหา" : "เริ่มจากหน้าหลัก หรือเลือกติดตามปัญหาที่พบ"}
+                  />
+                )}
+                {trackedIssues.length > 5 && (
+                  <nav className="pagination" aria-label="หน้ารายการติดตาม">
+                    <button
+                      aria-label="หน้าก่อนหน้า"
+                      disabled={trackPage === 1}
+                      onClick={() => setTrackPage((n) => Math.max(1, n - 1))}
+                    >
+                      <ArrowLeft size={15} />
+                    </button>
+                    {Array.from({ length: trackPages }, (_, n) => n + 1)
+                      .filter(
+                        (n) =>
+                          n === 1 ||
+                          n === trackPages ||
+                          Math.abs(n - trackPage) <= 1,
+                      )
+                      .map((n, index, visible) => (
+                        <React.Fragment key={n}>
+                          {index > 0 && n - visible[index - 1] > 1 && (
+                            <span aria-hidden="true">…</span>
+                          )}
+                          <button
+                            aria-label={`หน้า ${n}`}
+                            aria-current={trackPage === n ? "page" : undefined}
+                            onClick={() => setTrackPage(n)}
+                          >
+                            {n}
+                          </button>
+                        </React.Fragment>
+                      ))}
+                    <button
+                      aria-label="หน้าถัดไป"
+                      disabled={trackPage === trackPages}
+                      onClick={() =>
+                        setTrackPage((n) => Math.min(trackPages, n + 1))
+                      }
+                    >
+                      <ArrowRight size={15} />
+                    </button>
+                    <small>
+                      {trackedIssues.length} เรื่อง · หน้า {trackPage}/{trackPages}
+                    </small>
+                  </nav>
+                )}
+              </>
+            )}
+            {page === "emergency" && (
+              <EmergencyPage geo={geo} />
+            )}
+            {page === "detail" && issue && (
+              <>
+                <button className="back-link" onClick={() => go(detailFrom)}>
+                  <ArrowLeft size={16} />
+                  กลับรายการ
+                </button>
+                <IssueSummary issue={publicIssue(issue)} />
+                {issue.status === "CLOSED" &&
+                  (issue.reportedBy === actor.id || issue.followers.includes(actor.id)) && (
+                  <section className="satisfaction-detail" aria-label="ความพึงพอใจต่อเรื่องนี้">
+                    <Star size={22} aria-hidden="true" />
+                    <div>
+                      <strong>การประเมินความพึงพอใจ</strong>
+                      <p>{issue.satisfaction?.some((entry) => entry.actorId === actor.id)
+                        ? `คุณให้ ${issue.satisfaction.find((entry) => entry.actorId === actor.id).score} จาก 5 คะแนนแล้ว ขอบคุณสำหรับความคิดเห็น`
+                        : "เรื่องปิดแล้ว ช่วยบอกความเห็นเพื่อปรับปรุงบริการ"}</p>
+                    </div>
+                    {!issue.satisfaction?.some((entry) => entry.actorId === actor.id) && (
+                      <Button variant="secondary" onClick={() => setRatingIssueId(issue.id)}>
+                        ให้คะแนน
+                      </Button>
+                    )}
+                  </section>
+                )}
+                {issue.reportedBy === actor.id && issue.status === "NEEDS_INFO" && (
+                  <section className="citizen-correction-card" aria-label="แก้ไขคำร้อง">
+                    <div>
+                      <span className="eyebrow">รอข้อมูลจากคุณ</span>
+                      <h2>เจ้าหน้าที่ขอข้อมูลเพิ่มเติม</h2>
+                      <p>{issue.requestedInfo}</p>
+                      <small>
+                        กรุณาส่งภายใน 7 วัน · ปิดเรื่องอัตโนมัติเมื่อพ้นกำหนด
+                      </small>
+                    </div>
+                    <Button onClick={() => setCorrecting(true)}>
+                      แก้ข้อมูลและส่งอีกครั้ง
+                    </Button>
+                  </section>
+                )}
+                <VoteFollow issue={issue} />
+                <h2 className="mt-6 mb-3">ความคืบหน้า</h2>
+                <Timeline issue={issue} />
+              </>
+            )}
+          </div>
+          <div className="citizen-bottom">
+            <button className={page === 'portal' ? 'active' : ''} onClick={() => go('portal')}>
+              <Home size={20} />
+              <span>หน้าหลัก</span>
+            </button>
+            <button className={page === 'nearby' || page === 'form' ? 'active' : ''} onClick={() => go('nearby')}>
+              <Plus size={20} />
+              <span>แจ้งเรื่อง</span>
+            </button>
+            <button className={page === 'tracking' || page === 'detail' ? 'active' : ''} onClick={() => go('tracking')}>
+              <ClipboardList size={20} />
+              <span>ติดตาม</span>
+            </button>
+            <button className={page === 'emergency' ? 'active emergency-tab' : 'emergency-tab'} onClick={() => go('emergency')}>
+              <Phone size={20} />
+              <span>ฉุกเฉิน</span>
+            </button>
+          </div>
         </div>
       </div>
       {correcting && issue && (
@@ -1081,7 +1126,7 @@ export default function Citizen({ navOpen, setNavOpen }) {
           onClose={() => setCorrecting(false)}
         />
       )}
-      {ratingIssueId && db.issues.find((entry) => entry.id === ratingIssueId) && (
+      {ratingIssueId && (
         <SatisfactionModal key={ratingIssueId}
           issue={db.issues.find((entry) => entry.id === ratingIssueId)}
           onClose={() => setRatingIssueId(null)} />
