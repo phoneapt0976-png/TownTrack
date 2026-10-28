@@ -66,21 +66,21 @@ const CATEGORY_OPTIONS = [
 
 function VoteFollow({ issue, compact = false }) {
   const { act, busy, actor } = useStore(),
-    voted = issue?.voters?.includes(actor.id) || false,
-    followed = issue?.followers?.includes(actor.id) || false;
+    voted = issue.voters.includes(actor.id),
+    followed = issue.followers.includes(actor.id);
   return (
     <div className={cx("vote-follow", compact && "compact")}>
       <Button
         variant="secondary"
-        disabled={busy || voted || issue?.status === "CLOSED"}
+        disabled={busy || voted || issue.status === "CLOSED"}
         onClick={() =>
           act("VOTE", issue, {}, "โหวตสำเร็จ ขอบคุณที่ช่วยยืนยันปัญหา")
         }
-        aria-label={"โหวต " + (issue?.id || "")}
+        aria-label={"โหวต " + issue.id}
       >
         <ThumbsUp size={15} />
-        {voted ? "โหวตแล้ว" : compact ? issue?.votes || 0 : "กดโหวต (+1)"}
-        {!compact && <span className="vote-number">{issue?.votes || 0}</span>}
+        {voted ? "โหวตแล้ว" : compact ? issue.votes : "กดโหวต (+1)"}
+        {!compact && <span className="vote-number">{issue.votes}</span>}
       </Button>
       <Button
         variant={followed ? "ghost" : "secondary"}
@@ -93,7 +93,7 @@ function VoteFollow({ issue, compact = false }) {
             followed ? "ยกเลิกติดตามแล้ว" : "ติดตามปัญหานี้แล้ว",
           )
         }
-        aria-label={"ติดตาม " + (issue?.id || "")}
+        aria-label={"ติดตาม " + issue.id}
       >
         {followed ? <BellRing size={15} /> : <Bell size={15} />}
         <span>{followed ? "ติดตามแล้ว" : "ติดตามปัญหานี้"}</span>
@@ -119,8 +119,8 @@ function SatisfactionModal({ issue, onClose }) {
   return (
     <Modal title="ประเมินความพึงพอใจ" onClose={onClose}>
       <form className="satisfaction-form" onSubmit={submitModal}>
-        <span className="satisfaction-kicker">เรื่องปิดแล้ว · {issue?.id}</span>
-        <h3>{issue?.title}</h3>
+        <span className="satisfaction-kicker">เรื่องปิดแล้ว · {issue.id}</span>
+        <h3>{issue.title}</h3>
         <p>การแก้ไขปัญหาเรื่องนี้ตรงกับความคาดหวังของคุณแค่ไหน</p>
         <fieldset>
           <legend>ให้คะแนนความพึงพอใจ <span aria-hidden="true">*</span></legend>
@@ -162,14 +162,14 @@ function SatisfactionModal({ issue, onClose }) {
 function CitizenCorrectionForm({ issue, onClose }) {
   const { act, busy, notify } = useStore();
   const [data, setData] = useState({
-    title: issue?.title || "",
-    description: issue?.description || "",
-    place: issue?.place || "",
-    phone: issue?.phone || "",
-    reporterName: issue?.reporterName || "",
+    title: issue.title || "",
+    description: issue.description || "",
+    place: issue.place || "",
+    phone: issue.phone || "",
+    reporterName: issue.reporterName || "",
   });
   const [media, setMedia] = useState([]);
-  const deadline = issue?.citizenEditDeadline
+  const deadline = issue.citizenEditDeadline
     ? new Intl.DateTimeFormat(getLanguage() === "en" ? "en-GB" : "th-TH", {
         dateStyle: "long",
         timeStyle: "short",
@@ -179,11 +179,11 @@ function CitizenCorrectionForm({ issue, onClose }) {
   return (
     <Modal title="แก้ไขและส่งข้อมูลเพิ่มเติม" onClose={onClose}>
       <p className="muted mb-3">
-        {issue?.id} · {issue?.title}
+        {issue.id} · {issue.title}
       </p>
       <div className="citizen-correction-request">
         <strong>ข้อมูลที่เจ้าหน้าที่ขอ</strong>
-        <p>{issue?.requestedInfo || "โปรดตรวจสอบและเติมข้อมูลให้ครบถ้วน"}</p>
+        <p>{issue.requestedInfo || "โปรดตรวจสอบและเติมข้อมูลให้ครบถ้วน"}</p>
         <small>ส่งแก้ไขได้ถึง {deadline} · ภายใน 7 วัน</small>
       </div>
       <form
@@ -245,12 +245,12 @@ function CitizenCorrectionForm({ issue, onClose }) {
             onChange={(event) => set("phone", event.target.value)}
           />
         </Field>
-        {issue?.media?.length < 5 ? (
+        {issue.media.length < 5 ? (
           <Uploader
             files={media}
             onChange={setMedia}
             label="เพิ่มรูปหรือวิดีโอประกอบ"
-            maxFiles={5 - (issue?.media?.length || 0)}
+            maxFiles={5 - issue.media.length}
           />
         ) : (
           <p className="muted text-sm">
@@ -378,7 +378,7 @@ function CitizenNav({ page, go, open, setOpen }) {
 }
 
 export default function Citizen({ navOpen, setNavOpen }) {
-  const { act, busy, notify, actor, citizenIdentity } = useStore();
+  const { db, act, busy, notify, actor, citizenIdentity } = useStore();
   const geo = useGeolocation();
   const locate = async () => {
     const position = await geo.request();
@@ -394,10 +394,6 @@ export default function Citizen({ navOpen, setNavOpen }) {
     [detailFrom, setDetailFrom] = useState("portal"),
     [search, setSearch] = useState(""),
     [trackPage, setTrackPage] = useState(1);
-
-  // ดึงข้อมูลจริงจาก Neon โดยตรง
-  const [neonIssues, setNeonIssues] = useState([]);
-
   const [form, setForm] = useState({
       category: "ไฟฟ้าส่องสว่าง",
       phone: "",
@@ -411,12 +407,10 @@ export default function Citizen({ navOpen, setNavOpen }) {
     [receipt, setReceipt] = useState(null);
   const [correcting, setCorrecting] = useState(false);
   const [ratingIssueId, setRatingIssueId] = useState(null);
-
   useEffect(() => {
     if (geo.source === "gps")
       setForm((f) => ({ ...f, location: geo.location }));
   }, [geo.location, geo.source]);
-
   useEffect(() => {
     if (citizenIdentity?.displayName)
       setForm((f) => ({
@@ -424,99 +418,52 @@ export default function Citizen({ navOpen, setNavOpen }) {
         reporterName: f.reporterName || citizenIdentity.displayName,
       }));
   }, [citizenIdentity?.displayName]);
-
-  // โหลดข้อมูลจริงจากตาราง reports ใน Neon
-  useEffect(() => {
-    const fetchNeonReports = async () => {
-      try {
-        const { neon } = await import('@neondatabase/serverless');
-        const sql = neon("postgresql://neondb_owner:npg_HmAiMfy2qU5N@ep-noisy-truth-b5sf63d2-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require");
-        
-        const rows = await sql`SELECT * FROM reports ORDER BY created_at DESC`;
-        
-        const formatted = rows.map((r) => ({
-          id: "REQ-" + r.id,
-          title: r.title || "แจ้งปัญหาทั่วไป",
-          description: r.description || "",
-          place: r.location || "ไม่ระบุสถานที่",
-          category: r.title || "ทั่วไป",
-          status: r.status || "NEW",
-          reportedBy: r.citizen_id || actor.id,
-          reporterName: "ประชาชน",
-          phone: "",
-          followers: [],
-          voters: [],
-          votes: 1,
-          updatedAt: r.created_at || new Date().toISOString(),
-          createdAt: r.created_at || new Date().toISOString(),
-          media: [],
-          satisfaction: [],
-          location: USER_LOCATION,
-          timeline: [
-            { status: "NEW", title: "รับแจ้งเรื่องเข้าสู่ระบบ", time: r.created_at || new Date().toISOString() }
-          ]
-        }));
-
-        setNeonIssues(formatted);
-      } catch (err) {
-        console.error("Failed to fetch reports from Neon:", err);
-      }
-    };
-
-    fetchNeonReports();
-  }, [page, actor.id]);
-
   const update = (key, value) => setForm((f) => ({ ...f, [key]: value }));
-  
   const open = (i) => {
     setDetailFrom(page);
     setSelected(i.id);
     setPage("detail");
+    if (page === "tracking" && i.status === "CLOSED" &&
+        (i.reportedBy === actor.id || i.followers.includes(actor.id)) &&
+        !i.satisfaction?.some((entry) => entry.actorId === actor.id)) {
+      setRatingIssueId(i.id);
+    }
   };
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [page]);
-
-  // ดึงข้อมูลตัวที่เลือกจาก Neon ตรงๆ
-  const issue = neonIssues.find((i) => i.id === selected) || {
-    id: selected || "REQ-0000",
-    title: "กำลังโหลด...",
-    description: "",
-    place: "",
-    category: "ทั่วไป",
-    status: "NEW",
-    reportedBy: actor.id,
-    followers: [],
-    voters: [],
-    votes: 0,
-    updatedAt: new Date().toISOString(),
-    media: [],
-    satisfaction: [],
-    timeline: []
-  };
-
-  const near = nearby(neonIssues, form.location);
-  
+  const issue = db.issues.find((i) => i.id === selected);
+  const near = nearby(db.issues, form.location);
   const go = (p) => {
     setPage(p);
     setSelected(null);
   };
-
-  const trackingScope = useMemo(() => neonIssues, [neonIssues]);
-
+  const trackingScope = useMemo(() => db.issues.filter((i) =>
+    trackTab === "mine" ? i.reportedBy === actor.id : i.followers.includes(actor.id)
+  ), [db.issues, trackTab, actor.id]);
+  const needsRating = (i) => i.status === "CLOSED" &&
+    !i.satisfaction?.some((rating) => rating.actorId === actor.id);
+  const hasRated = (i) => i.status === "CLOSED" &&
+    i.satisfaction?.some((rating) => rating.actorId === actor.id);
+  const trackingCounts = {
+    all: trackingScope.length,
+    active: trackingScope.filter((i) => i.status !== "CLOSED").length,
+    closed: trackingScope.filter(needsRating).length,
+    rated: trackingScope.filter(hasRated).length,
+  };
   const trackedIssues = trackingScope.filter((i) => {
-    return [i.title, i.id, i.place].join(" ").toLowerCase().includes(search.toLowerCase());
+    const matchesStatus = trackStatus === "all" ||
+      (trackStatus === "active" && i.status !== "CLOSED") ||
+      (trackStatus === "closed" && needsRating(i)) ||
+      (trackStatus === "rated" && hasRated(i));
+    return matchesStatus && [i.title, i.id].join(" ").toLowerCase().includes(search.toLowerCase());
   }).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-
   const trackPages = Math.max(1, Math.ceil(trackedIssues.length / 5));
-  
   useEffect(() => setTrackPage(1), [trackTab, trackStatus, search]);
   useEffect(() => {
     if (trackPage > trackPages) setTrackPage(trackPages);
   }, [trackPage, trackPages]);
 
-  // ฟังก์ชันส่งข้อมูลเข้า Neon ฐานข้อมูลจริง
   const submit = async (event) => {
     event.preventDefault();
     if (!form.description.trim()) {
@@ -538,7 +485,7 @@ export default function Citizen({ navOpen, setNavOpen }) {
       const { neon } = await import('@neondatabase/serverless');
       const sql = neon("postgresql://neondb_owner:npg_HmAiMfy2qU5N@ep-noisy-truth-b5sf63d2-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require");
 
-      const result = await sql`
+      await sql`
         INSERT INTO reports (title, description, location, citizen_id)
         VALUES (
           ${form.title || form.category}, 
@@ -546,12 +493,11 @@ export default function Citizen({ navOpen, setNavOpen }) {
           ${form.place}, 
           ${actor.id}
         )
-        RETURNING id
       `;
 
       notify("ส่งคำร้องสำเร็จ ข้อมูลบันทึกลง Neon เรียบร้อย!");
-      const newId = "REQ-" + (result[0]?.id || Math.floor(1000 + Math.random() * 9000));
-      setReceipt(newId);
+      const fakeId = "REQ-" + Math.floor(1000 + Math.random() * 9000);
+      setReceipt(fakeId);
       setPage("receipt");
       setMedia([]);
       setForm({ ...form, title: "", description: "" });
@@ -597,12 +543,14 @@ export default function Citizen({ navOpen, setNavOpen }) {
       <div className="citizen-wrap">
         <div className="phone-frame">
           <div className="citizen-header">
-            <a className="municipal-mark" href="/citizen" aria-label="TownTrack · กลับหน้าหลักประชาชน">ท</a>
-            <div>
-              <a href="/citizen" aria-label="TownTrack · กลับหน้าหลักประชาชน" style={{ color: "inherit", textDecoration: "none", display: "inline-flex", alignItems: "center", minHeight: 44 }}><strong>TownTrack</strong></a>
+            <a className="municipal-mark" href="/citizen" aria-label="TownTrack · กลับหน้าหลัก">ท</a>
+            <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+              <a href="/citizen" style={{ color: "inherit", textDecoration: "none", fontSize: "16px", fontWeight: "700" }}>
+                TownTrack
+              </a>
               <small>
                 {citizenIdentity
-                  ? `LINE OA · ${citizenIdentity.displayName || "ยืนยันตัวตนแล้ว"}`
+                  ? `ผู้ใช้งาน: ${citizenIdentity.displayName || "ยืนยันตัวตนแล้ว"}`
                   : MUNICIPALITY}
               </small>
             </div>
@@ -618,6 +566,7 @@ export default function Citizen({ navOpen, setNavOpen }) {
               <i />
             </button>
           </div>
+          
           {!['portal', 'emergency'].includes(page) && (
             <nav className="citizen-flow" aria-label="ขั้นตอนแจ้งและติดตามปัญหา">
               {[
@@ -648,6 +597,7 @@ export default function Citizen({ navOpen, setNavOpen }) {
               })}
             </nav>
           )}
+
           <div className={cx("citizen-body", "citizen-page-" + page)}>
             {page === "nearby" && (
               <>
@@ -939,6 +889,31 @@ export default function Citizen({ navOpen, setNavOpen }) {
               <>
                 <span className="eyebrow">ทุกเรื่องมีความคืบหน้า</span>
                 <h1>ติดตามสถานะปัญหา</h1>
+                <div className="segmented">
+                  <button
+                    aria-pressed={trackTab === "mine"}
+                    className={trackTab === "mine" ? "active" : ""}
+                    onClick={() => setTrackTab("mine")}
+                  >
+                    เรื่องที่ฉันแจ้งเอง
+                  </button>
+                  <button
+                    aria-pressed={trackTab === "follow"}
+                    className={trackTab === "follow" ? "active" : ""}
+                    onClick={() => setTrackTab("follow")}
+                  >
+                    เรื่องที่ติดตาม
+                  </button>
+                </div>
+                <div className="tracking-status-filters" role="group" aria-label="กรองสถานะเรื่องที่ติดตาม">
+                  {[["all", "ทั้งหมด"], ["active", "กำลังดำเนินการ"], ["closed", "ปิดเรื่องแล้ว"], ["rated", "ประเมินแล้ว"]].map(([value, label]) => (
+                    <button type="button" key={value} aria-pressed={trackStatus === value}
+                      onClick={() => setTrackStatus(value)}>
+                      <span>{label}</span><strong>{trackingCounts[value]}</strong>
+                    </button>
+                  ))}
+                </div>
+                <p className="tracking-status-help">เลือก “ปิดเรื่องแล้ว” แล้วกดเรื่องเพื่อประเมินความพึงพอใจ เรื่องที่ให้คะแนนแล้วดูได้ใน “ประเมินแล้ว”</p>
                 <div className="search-input">
                   <Search size={16} />
                   <input
@@ -994,7 +969,7 @@ export default function Citizen({ navOpen, setNavOpen }) {
                         <ChevronRight size={15} />
                       </div>
                     </button>
-                  ))}
+                    ))}
                 </div>
                 {!trackedIssues.length && (
                   <Empty
@@ -1100,6 +1075,7 @@ export default function Citizen({ navOpen, setNavOpen }) {
               </>
             )}
           </div>
+
           <div className="citizen-bottom">
             <button className={page === 'portal' ? 'active' : ''} onClick={() => go('portal')}>
               <Home size={20} />
@@ -1118,6 +1094,7 @@ export default function Citizen({ navOpen, setNavOpen }) {
               <span>ฉุกเฉิน</span>
             </button>
           </div>
+
         </div>
       </div>
       {correcting && issue && (
@@ -1126,7 +1103,7 @@ export default function Citizen({ navOpen, setNavOpen }) {
           onClose={() => setCorrecting(false)}
         />
       )}
-      {ratingIssueId && (
+      {ratingIssueId && db.issues.find((entry) => entry.id === ratingIssueId) && (
         <SatisfactionModal key={ratingIssueId}
           issue={db.issues.find((entry) => entry.id === ratingIssueId)}
           onClose={() => setRatingIssueId(null)} />
