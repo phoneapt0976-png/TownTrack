@@ -1,0 +1,10 @@
+{
+  "appId": "com.towntrack.app",
+  "appName": "TownTrack",
+  "webDir": "dist",
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  }
+}

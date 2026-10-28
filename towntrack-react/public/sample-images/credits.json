@@ -1,0 +1,68 @@
+[
+  {
+    "url": "sample-images/0.jpg",
+    "name": "A fallen street light pole.jpg",
+    "type": "image/jpeg",
+    "size": 279810,
+    "source": "https://commons.wikimedia.org/wiki/File:A_fallen_street_light_pole.jpg",
+    "author": "Niera",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sample": true
+  },
+  {
+    "url": "sample-images/1.jpg",
+    "name": "Large pot hole on 2nd Avenue in New York City.JPG",
+    "type": "image/jpeg",
+    "size": 269606,
+    "source": "https://commons.wikimedia.org/wiki/File:Large_pot_hole_on_2nd_Avenue_in_New_York_City.JPG",
+    "author": "David Shankbone",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "sample": true
+  },
+  {
+    "url": "sample-images/2.jpg",
+    "name": "Eve Road dumped clothes (48230317066).jpg",
+    "type": "image/jpeg",
+    "size": 300441,
+    "source": "https://commons.wikimedia.org/wiki/File:Eve_Road_dumped_clothes_(48230317066).jpg",
+    "author": "Alan Stanton",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "sample": true
+  },
+  {
+    "url": "sample-images/3.jpg",
+    "name": "A blocked drain - geograph.org.uk - 768217.jpg",
+    "type": "image/jpeg",
+    "size": 119981,
+    "source": "https://commons.wikimedia.org/wiki/File:A_blocked_drain_-_geograph.org.uk_-_768217.jpg",
+    "author": "Evelyn Simak",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "sample": true
+  },
+  {
+    "url": "sample-images/4.jpg",
+    "name": "Fallen Tree, Wells Road - geograph.org.uk - 335010.jpg",
+    "type": "image/jpeg",
+    "size": 330779,
+    "source": "https://commons.wikimedia.org/wiki/File:Fallen_Tree,_Wells_Road_-_geograph.org.uk_-_335010.jpg",
+    "author": "Bob Embleton",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "sample": true
+  },
+  {
+    "url": "sample-images/5.jpg",
+    "name": "Firefighters on a scaffold.jpg",
+    "type": "image/jpeg",
+    "size": 108202,
+    "source": "https://commons.wikimedia.org/wiki/File:Firefighters_on_a_scaffold.jpg",
+    "author": "heb@Wikimedia Commons (mail)",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "sample": true
+  }
+]

@@ -1,0 +1,139 @@
+/* Shared reading, touch targets and responsive task layouts for all five roles. */
+.role-page { color: #203e52; }
+.role-page :is(button, a, input, select, textarea) { touch-action: manipulation; }
+.role-page :is(h1, h2, h3) { text-wrap: balance; line-height: 1.45; }
+.role-page :is(p, .field, .data-list) { line-height: 1.7; }
+.role-page :is(.btn, .icon-btn, .desk-back, .segmented button, .desk-queue-tabs button, .area-case-actions button) { min-height: 44px; }
+.role-page .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: normal; line-height: 1.5; padding: 11px 16px; }
+.role-page .btn > svg { flex-shrink: 0; }
+.role-page :is(input:not([type=checkbox]):not([type=radio]), select, textarea) { font-size: 16px; }
+.role-page :is(input:not([type=checkbox]):not([type=radio]), select) { min-height: 46px; }
+.role-page textarea { min-height: 112px; resize: vertical; }
+.role-page :is(.field, .form-grid > *, .desk-case, .tracking-card, .area-case-card) { min-width: 0; }
+.role-page :is(.desk-case h3, .tracking-card h3, .area-case-title, .data-list dd) { overflow-wrap: anywhere; }
+.role-page :is(.desk-case, .tracking-card) { text-align: left; }
+.role-page :is(.desk-case, .tracking-card, .area-case-card) { border-radius: 16px; }
+.role-page .desk-case { padding: 16px; margin-bottom: 10px; }
+.role-page .desk-case h3 { font-size: 16px; line-height: 1.6; }
+.role-page .desk-case.is-selected { border-color: #227ca9; box-shadow: inset 3px 0 #227ca9; background: #eef8fe; }
+.role-page :is(.desk-case-place, .desk-case-foot time, .desk-filters label > span, .desk-sort-control > span) { font-size: 14px; }
+.role-page .desk-case-foot { flex-wrap: wrap; row-gap: 8px; }
+.role-page :is(.desk-metric span, .desk-flow li strong, .desk-priority-views button, .desk-queue-tabs button) { font-size: 14px; line-height: 1.5; }
+.role-page .desk-metric { padding: 10px 12px; }
+.role-page .desk-metric strong { font-variant-numeric: tabular-nums; }
+.desk-results-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 0 20px 12px; color: #486578; font-size: 14px; }
+.desk-results-bar button { min-height: 44px; border: 1px solid #c6dce9; border-radius: 10px; padding: 8px 12px; background: #f3f9fd; color: #165c83; cursor: pointer; }
+.role-page .desk-detail-cap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.desk-action-link { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 12px; border-radius: 10px; color: #12577b; background: #eaf5fc; font-size: 14px; text-decoration: none; }
+.desk-action-target, .desk-workspace { scroll-margin-top: 20px; }
+.role-page .workflow-actions { border: 1px solid #c0dce9; border-radius: 16px; padding: 18px; background: #f5faff; }
+.role-page .action-stack { display: grid; gap: 10px; }
+.role-page .action-stack .btn { width: 100%; }
+.role-page .modal { max-width: calc(100vw - 24px); max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); overscroll-behavior: contain; }
+.role-page .modal-head { align-items: flex-start; gap: 14px; }
+.role-page .modal-head h2 { font-size: 21px; }
+.role-page .modal-head .icon-btn { flex: 0 0 44px; width: 44px; }
+.role-page .modal-actions { gap: 12px; padding-bottom: env(safe-area-inset-bottom); }
+.role-page .area-case-actions { gap: 8px; }
+.role-page .area-case-title { line-height: 1.6; }
+.role-page .tracking-card { padding: 18px; }
+.role-page .tracking-card h3 { font-size: 17px; }
+.role-page .tracking-card small { line-height: 1.65; }
+.role-page .tracking-status-filters button { min-height: 52px; }
+@media (max-width: 760px) {
+  .role-page .desk { padding: 18px 12px 28px; }
+  .role-page .desk-welcome h1 { font-size: 25px; }
+  .role-page .desk-welcome p { font-size: 15px; }
+  .role-page .desk-flow ol { display: grid; grid-template-columns: 1fr; gap: 8px; }
+  .role-page .desk-flow li { display: flex; gap: 10px; }
+  .role-page .desk-flow li i { display: none; }
+  .role-page .desk-flow li > span { width: 28px; height: 28px; flex-shrink: 0; font-size: 12px; }
+  .role-page .desk-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .role-page .desk-metric { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; padding: 10px 8px; border: 1px solid #d9e7ef; border-radius: 10px; }
+  .role-page .desk-metric span { font-size: 13px; overflow-wrap: anywhere; }
+  .role-page .desk-metric strong { font-size: 25px; }
+  .role-page .desk-detail { padding: 16px; }
+  .role-page .desk-priority-views button { min-height: 52px; font-size: 13px; }
+  .role-page .desk-back { min-height: 44px; font-size: 15px; }
+  .role-page .desk-filters { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  .role-page .desk-case-list { max-height: none; }
+  .role-page .desk-detail-idle { display: none; }
+  .role-page .area-case-actions { flex-wrap: wrap; }
+  .role-page .area-case-actions button { flex: 1 1 auto; }
+  .role-page .tracking-card { padding: 16px; }
+  .role-page .segmented { display: flex; gap: 4px; }
+  .role-page .segmented button { flex: 1; padding: 10px 8px; white-space: normal; font-size: 15px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .role-page *, .role-page *::before, .role-page *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
+}
+
+.desk-list-pagination { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; padding: 16px; border-top: 1px solid #d9e7ef; }
+.desk-list-pagination span { flex-basis: 100%; text-align: center; font-size: 14px; color: #486578; }
+.desk-list-pagination button { min-height: 44px; padding: 10px 16px; border: 1px solid #bdd9e8; border-radius: 12px; background: #f1f8fd; color: #165c83; cursor: pointer; }
+
+.citizen-location-notice { display: flex; gap: 12px; margin: 16px auto; padding: 16px 18px; width: calc(100% - 28px); max-width: 1400px; border: 1px solid #bcd9e9; border-radius: 14px; background: #edf7ff; color: #204e69; }
+.citizen-location-notice > svg { flex-shrink: 0; margin-top: 3px; }
+.citizen-location-notice strong { font-size: 16px; }
+.citizen-location-notice p { margin: 4px 0; font-size: 15px; line-height: 1.65; }
+.citizen-location-notice small { display: block; font-size: 14px; line-height: 1.6; }
+.citizen-location-notice button { display: block; min-height: 44px; margin-top: 10px; padding: 8px 12px; background: #fff; border: 1px solid #9dbfd4; border-radius: 10px; color: #204e69; cursor: pointer; }
+
+/* Clear, scan-friendly issue details shared by citizen and staff roles. */
+.role-page .issue-summary { min-width: 0; }
+.role-page .issue-summary > h2 { margin: 8px 0 12px; font-size: clamp(21px, 2vw, 26px); line-height: 1.45; color: #1c4057; }
+.role-page .issue-summary-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 7px 12px; margin: 0 0 18px; color: #526f82; font-size: 14px; line-height: 1.5; }
+.role-page .issue-summary-meta > span:not(.category-tag) { display: inline-flex; align-items: center; min-height: 30px; }
+.role-page .issue-summary-block { padding: 16px 0; border-top: 1px solid #dce9f0; }
+.role-page .issue-summary-block h3 { margin: 0 0 8px; color: #244f68; font-size: 16px; font-weight: 750; }
+.role-page .issue-summary-block .summary-description { margin: 0; color: #2e4f63; font-size: 16px; line-height: 1.75; overflow-wrap: anywhere; white-space: pre-wrap; }
+.role-page .issue-summary-block .summary-location { align-items: flex-start; gap: 8px; margin: 0 0 10px; color: #315c75; font-size: 15px; line-height: 1.6; }
+.role-page .issue-summary-block .summary-location svg { flex: 0 0 auto; margin-top: 3px; }
+.role-page .issue-summary-block .map-link { min-height: 44px; align-items: center; margin: 0; font-size: 14px; font-weight: 650; }
+.role-page .issue-summary-block .media-grid { margin: 4px 0 0; }
+.role-page .issue-summary-block .media-item > span { font-size: 13px; line-height: 1.4; }
+.role-page .desk-queue-note, .role-page .desk-latest-order { margin: -3px 20px 14px; color: #537184; font-size: 13px; line-height: 1.5; }
+.role-page .desk-latest-order { margin-top: 0; padding: 9px 12px; border-radius: 9px; background: #eef7fb; color: #315f79; }
+.role-page .desk-queue-tabs { align-items: stretch; }
+.role-page .desk-queue-tabs button { min-width: 0; padding: 8px 5px; font-weight: 650; white-space: normal; }
+.role-page .desk-queue-tabs button.is-current { color: #0d5b82; }
+@media (max-width: 760px) {
+  .role-page .issue-summary-block { padding: 14px 0; }
+  .role-page .issue-summary-meta { gap: 5px 10px; font-size: 13px; }
+  .role-page .desk-queue-tabs { margin-left: 13px; margin-right: 13px; }
+  .role-page .desk-queue-note, .role-page .desk-latest-order { margin-left: 13px; margin-right: 13px; }
+}
+
+/* Alert inbox: choose an issue before opening its workflow. */
+.alert-picker { padding: 0 22px 22px; }
+.alert-picker-intro { margin: 0 0 16px; color: #476477; font-size: 15px; line-height: 1.65; }
+.alert-picker .desk-search { margin: 0; }
+.alert-picker-count { margin: 12px 0; color: #526e80; font-size: 14px; }
+.alert-picker-list { display: grid; gap: 14px; }
+.alert-picker-card { min-width: 0; padding: 18px; border: 1px solid #d6e6ef; border-radius: 16px; background: #fff; }
+.alert-picker-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.alert-picker-card h3 { margin: 12px 0 8px; color: #20465e; font-size: 18px; line-height: 1.5; overflow-wrap: anywhere; }
+.alert-picker-place { display: flex; gap: 7px; margin: 0 0 10px; color: #496b80; font-size: 14px; }
+.alert-picker-place svg { flex-shrink: 0; margin-top: 3px; }
+.alert-picker-description { margin: 0 0 12px; color: #354f60; font-size: 15px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
+.alert-picker-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin-bottom: 14px; color: #587082; font-size: 13px; }
+.alert-picker-foot > span { display: inline-flex; align-items: center; gap: 5px; }
+.alert-picker-card > .btn { width: 100%; min-height: 44px; }
+@media (max-width: 760px) {
+  .alert-picker { padding: 0 14px calc(18px + env(safe-area-inset-bottom)); }
+  .alert-picker-card { padding: 15px; }
+  .role-page .desk-alert { flex-wrap: wrap; }
+  .role-page .desk-alert > div { flex: 1; min-width: 0; }
+  .role-page .desk-alert > button { justify-content: center; min-height: 44px; }
+}
+
+/* Keep the close control visible while browsing the alert inbox. */
+.role-page .alert-picker-modal { padding: 0; }
+.alert-picker-modal > .modal-head { position: sticky; top: 0; z-index: 2; margin: 0 0 16px; padding: 18px 22px; border-bottom: 1px solid #dce8ef; background: #fff; }
+.alert-picker-modal > .modal-head .icon-btn { min-width: 44px; min-height: 44px; border: 1px solid #d1e3ee; border-radius: 12px; background: #f1f8fc; color: #245672; }
+@media (max-width: 760px) { .alert-picker-modal > .modal-head { padding: 14px; } }
+
+.modal-dismiss-layer { position: absolute; inset: 0; }
+.modal-dismiss-layer + .modal { position: relative; }
+
+.modal-backdrop-dismissible { z-index: 120; }

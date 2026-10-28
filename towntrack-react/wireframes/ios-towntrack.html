@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f2f7fa" />
+    <title>TownTrack · iOS Wireframe</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #132c40;
+        --muted: #6b8090;
+        --line: #d7e2e9;
+        --paper: #fff;
+        --wash: #f2f7fa;
+        --blue: #1976b9;
+        --blue-dark: #155e94;
+        --blue-soft: #e9f5fc;
+        --mint: #e9f8f2;
+        --amber: #fff4dc;
+        --rose: #fff0ed;
+        --shadow: 0 24px 68px rgba(20, 53, 77, .14);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        background:
+          radial-gradient(ellipse at 47% -15%, #e0f1fa 0, transparent 46%),
+          var(--wash);
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+      }
+      button { font: inherit; }
+      .page { max-width: 1440px; margin: 0 auto; padding: 26px 34px 38px; }
+      .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
+      .brand-line { display: flex; align-items: center; gap: 10px; color: var(--blue); font-size: 12px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+      .brand-mark { width: 28px; height: 28px; display: grid; place-items: center; border: 1px solid #b9d9eb; border-radius: 9px; background: var(--paper); }
+      .brand-mark svg { width: 16px; height: 16px; }
+      h1 { margin: 10px 0 6px; font-size: clamp(24px, 3vw, 34px); line-height: 1.14; letter-spacing: -.035em; }
+      .page-head p { max-width: 700px; margin: 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
+      .edition { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid #d1e3ed; border-radius: 999px; background: rgba(255,255,255,.72); color: #45677e; font-size: 12px; font-weight: 700; white-space: nowrap; }
+      .edition i { width: 7px; height: 7px; border-radius: 50%; background: #41a5d8; box-shadow: 0 0 0 4px #e4f4fc; }
+      .workbench { display: grid; grid-template-columns: 248px minmax(370px, 1fr) 280px; align-items: start; gap: 26px; }
+      .panel { padding: 18px; border: 1px solid #dce7ed; border-radius: 18px; background: rgba(255,255,255,.8); box-shadow: 0 7px 24px rgba(24,61,85,.035); }
+      .panel-kicker { color: #7b919f; font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+      .panel h2 { margin: 6px 0 4px; font-size: 17px; letter-spacing: -.02em; }
+      .panel-copy { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+      .role-list { display: grid; gap: 7px; margin-top: 16px; }
+      .role-button, .screen-button { width: 100%; display: flex; align-items: center; text-align: left; cursor: pointer; }
+      .role-button { gap: 10px; padding: 10px; border: 1px solid transparent; border-radius: 12px; background: transparent; color: #476174; }
+      .role-button:hover, .role-button[aria-pressed="true"] { border-color: #c4deed; background: #edf7fc; color: var(--blue-dark); }
+      .role-icon { flex: 0 0 34px; height: 34px; display: grid; place-items: center; border: 1px solid #d9e6ed; border-radius: 10px; background: #fff; color: #53809c; font-size: 13px; font-weight: 800; }
+      .role-label { display: grid; gap: 3px; }
+      .role-label strong { font-size: 12px; }
+      .role-label small { color: #7d909c; font-size: 10px; }
+      .screen-group { margin-top: 21px; padding-top: 16px; border-top: 1px solid #e4edf1; }
+      .screen-group-title { margin-bottom: 9px; color: #7b919f; font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+      .screen-list { display: grid; gap: 4px; }
+      .screen-button { gap: 9px; padding: 8px 9px; border: 0; border-radius: 9px; background: transparent; color: #536b7b; font-size: 12px; }
+      .screen-button:hover, .screen-button[aria-current="page"] { background: #f0f6f9; color: var(--ink); font-weight: 700; }
+      .screen-number { width: 20px; height: 20px; display: grid; place-items: center; border: 1px solid #d8e5eb; border-radius: 7px; color: #7a909e; font-size: 9px; }
+      .role-note { margin-top: 16px; padding: 11px; border: 1px solid #dce9ef; border-radius: 12px; background: #f8fbfd; color: #688091; font-size: 10px; line-height: 1.55; }
+      .device-stage { display: grid; justify-items: center; gap: 12px; }
+      .device-caption { display: flex; align-items: center; justify-content: center; gap: 8px; color: #6b8392; font-size: 11px; }
+      .device-caption strong { color: #395b71; font-weight: 700; }
+      .device-caption span { width: 3px; height: 3px; border-radius: 50%; background: #a1b4bf; }
+      .phone { width: min(100%, 410px); height: min(790px, calc(100vh - 174px)); min-height: 640px; padding: 8px; overflow: hidden; border: 1px solid #0c1820; border-radius: 39px; background: #101b22; box-shadow: var(--shadow), inset 0 0 0 2px #30404a; }
+      .phone-screen { height: 100%; display: flex; flex-direction: column; overflow: hidden; border-radius: 31px; background: #fff; }
+      .statusbar { flex: 0 0 34px; display: flex; align-items: center; justify-content: space-between; padding: 0 19px 0 22px; color: #162c3b; font-size: 11px; font-weight: 750; }
+      .status-right { display: flex; align-items: center; gap: 5px; }
+      .status-right svg { width: 14px; height: 14px; }
+      .battery { position: relative; width: 19px; height: 9px; border: 1.2px solid #314a5a; border-radius: 3px; }
+      .battery::before { position: absolute; inset: 2px 3px 2px 2px; border-radius: 1px; background: #314a5a; content: ""; }
+      .battery::after { position: absolute; top: 2px; right: -3px; width: 2px; height: 4px; border-radius: 0 2px 2px 0; background: #314a5a; content: ""; }
+      .phone-head { flex: 0 0 auto; min-height: 54px; display: flex; align-items: center; gap: 9px; padding: 5px 17px 11px; border-bottom: 1px solid #edf1f3; }
+      .back-button, .head-action { width: 34px; height: 34px; flex: 0 0 34px; display: grid; place-items: center; border: 1px solid #e1eaf0; border-radius: 11px; background: #fff; color: #49697e; cursor: pointer; }
+      .back-button svg, .head-action svg { width: 17px; height: 17px; }
+      .phone-title { min-width: 0; flex: 1; }
+      .phone-title strong { display: block; overflow: hidden; color: #173348; font-size: 15px; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+      .phone-title small { display: block; margin-top: 2px; color: #8495a0; font-size: 9px; }
+      .screen-scroll { flex: 1 1 auto; overflow: auto; overscroll-behavior: contain; padding: 15px 16px 16px; scrollbar-width: none; }
+      .screen-scroll::-webkit-scrollbar { display: none; }
+      .bottom-nav { flex: 0 0 58px; display: flex; align-items: center; justify-content: space-around; border-top: 1px solid #e9eef1; background: rgba(255,255,255,.97); }
+      .bottom-nav[hidden] { display: none; }
+      .nav-item { min-width: 54px; display: grid; justify-items: center; gap: 4px; border: 0; background: none; color: #83939d; font-size: 9px; cursor: pointer; }
+      .nav-item svg { width: 18px; height: 18px; }
+      .nav-item.active { color: var(--blue); font-weight: 750; }
+      .home-indicator { flex: 0 0 17px; display: grid; place-items: center; background: white; }
+      .home-indicator span { width: 105px; height: 4px; border-radius: 999px; background: #18232a; }
+      .screen-content { display: grid; gap: 14px; color: var(--ink); }
+      .eyebrow { color: #79909e; font-size: 9px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+      .section-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0; font-size: 14px; letter-spacing: -.02em; }
+      .section-title small { color: #78909f; font-size: 10px; font-weight: 600; }
+      .hello { display: flex; align-items: center; justify-content: space-between; gap: 9px; }
+      .hello h2 { margin: 3px 0 0; font-size: 20px; letter-spacing: -.035em; }
+      .avatar { width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid #d6eaf5; border-radius: 13px; background: #f0f8fc; color: #3e81a5; font-size: 13px; font-weight: 800; }
+      .map-card { position: relative; height: 172px; overflow: hidden; border: 1px solid #d5e5ed; border-radius: 16px; background: #eef5f1; }
+      .map-grid { position: absolute; inset: -22px; opacity: .9; background-color: #edf4ee; background-image: linear-gradient(29deg, transparent 46%, #fff 47%, #fff 51%, transparent 52%), linear-gradient(115deg, transparent 41%, #fff 42%, #fff 46%, transparent 47%), linear-gradient(76deg, transparent 69%, #dceadf 70%, #dceadf 75%, transparent 76%), linear-gradient(0deg, transparent 73%, #e0ece7 74%, #e0ece7 78%, transparent 79%); background-size: 146px 112px, 158px 128px, 150px 104px, 120px 140px; }
+      .map-water { position: absolute; top: -19px; right: 46px; width: 70px; height: 230px; transform: rotate(24deg); background: #d9edf5; }
+      .map-place { position: absolute; z-index: 1; color: #859890; font-size: 8px; }
+      .map-place.p1 { top: 35px; left: 18px; } .map-place.p2 { right: 15px; bottom: 38px; }
+      .map-chip { position: absolute; z-index: 2; top: 10px; left: 10px; padding: 6px 8px; border: 1px solid #dce8e6; border-radius: 9px; background: rgba(255,255,255,.9); color: #45666a; font-size: 9px; font-weight: 700; }
+      .pin { position: absolute; z-index: 3; width: 28px; height: 28px; display: grid; place-items: center; border: 2px solid white; border-radius: 50% 50% 50% 4px; transform: rotate(-45deg); background: #388fbd; box-shadow: 0 3px 10px rgba(27,82,111,.2); color: #fff; }
+      .pin::after { width: 7px; height: 7px; border-radius: 50%; background: white; content: ""; }
+      .pin.p-a { top: 58px; left: 48%; } .pin.p-b { top: 95px; left: 25%; background: #d18c41; } .pin.p-c { top: 47px; right: 21%; background: #d76861; }
+      .map-bottom { position: absolute; z-index: 4; right: 9px; bottom: 9px; padding: 5px 7px; border: 1px solid #dae7e9; border-radius: 8px; background: rgba(255,255,255,.92); color: #597783; font-size: 8px; }
+      .button-row { display: grid; grid-template-columns: 1.25fr 1fr; gap: 8px; }
+      .btn { min-height: 45px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 9px 12px; border: 1px solid #d4e4ed; border-radius: 12px; background: #fff; color: #315c76; font-size: 11px; font-weight: 750; text-align: center; cursor: pointer; }
+      .btn svg { width: 16px; height: 16px; flex: 0 0 auto; }
+      .btn.primary { border-color: var(--blue); background: var(--blue); color: #fff; box-shadow: 0 4px 9px rgba(25,118,185,.13); }
+      .btn.soft { background: #f5fafc; }
+      .btn.danger { border-color: #f0d6d1; background: #fff8f6; color: #aa4c43; }
+      .summary-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+      .summary-box { min-height: 66px; display: grid; align-content: center; gap: 4px; padding: 9px; border: 1px solid #e1eaf0; border-radius: 12px; background: #fbfdfe; }
+      .summary-box strong { font-size: 18px; line-height: 1; }
+      .summary-box span { color: #728896; font-size: 9px; }
+      .summary-box.blue strong { color: var(--blue); } .summary-box.amber strong { color: #ba7b22; } .summary-box.green strong { color: #39906d; }
+      .case-card, .inbox-card, .approval-card, .task-card { padding: 12px; border: 1px solid #dfe9ee; border-radius: 13px; background: #fff; }
+      .case-top, .card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+      .case-id { color: #7d909c; font-size: 9px; font-weight: 700; }
+      .tag { display: inline-flex; align-items: center; gap: 4px; padding: 4px 7px; border: 1px solid #dbe7ed; border-radius: 999px; background: #f5f9fb; color: #587386; font-size: 9px; font-weight: 700; white-space: nowrap; }
+      .tag.wait { border-color: #f2dcda; background: #fff4f2; color: #b65b50; }
+      .tag.doing { border-color: #f0dfba; background: #fff8e8; color: #9a7028; }
+      .tag.done { border-color: #d0e9dd; background: #eff9f3; color: #44866a; }
+      .case-card h3, .inbox-card h3, .approval-card h3, .task-card h3 { margin: 9px 0 5px; font-size: 12px; line-height: 1.45; }
+      .case-card p, .inbox-card p, .approval-card p, .task-card p { margin: 0; color: #718693; font-size: 10px; line-height: 1.5; }
+      .case-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; padding-top: 9px; border-top: 1px solid #edf2f4; color: #83949e; font-size: 9px; }
+      .case-meta span { display: inline-flex; align-items: center; gap: 5px; }
+      .case-meta svg { width: 12px; height: 12px; }
+      .filters { display: flex; gap: 6px; overflow: auto; padding-bottom: 2px; scrollbar-width: none; }
+      .filter { flex: 0 0 auto; padding: 7px 10px; border: 1px solid #dce7ed; border-radius: 999px; background: #fff; color: #708795; font-size: 9px; }
+      .filter.selected { border-color: #afd4e8; background: #eaf6fc; color: #226d9d; font-weight: 800; }
+      .field { display: grid; gap: 6px; }
+      .field label { color: #506b7c; font-size: 10px; font-weight: 750; }
+      .input, .textarea, .selectlike { width: 100%; min-height: 43px; padding: 11px 12px; border: 1px solid #d8e4ea; border-radius: 11px; background: #fff; color: #536d7c; font-size: 11px; text-align: left; }
+      .textarea { min-height: 82px; line-height: 1.5; }
+      .priority-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+      .priority { min-height: 39px; display: grid; place-items: center; border: 1px solid #dce7ec; border-radius: 10px; background: #fff; color: #607887; font-size: 9px; font-weight: 700; }
+      .priority.active { border-color: #f0c77e; background: #fff8e9; color: #98671c; }
+      .priority.emergency { border-color: #f1d0cc; background: #fff6f4; color: #b85850; }
+      .location-row, .upload-row, .person-row, .resource-row, .approval-meta { display: flex; align-items: center; gap: 9px; padding: 10px; border: 1px solid #dfe9ee; border-radius: 11px; background: #fbfdfe; }
+      .mini-icon { width: 31px; height: 31px; flex: 0 0 31px; display: grid; place-items: center; border: 1px solid #d7e8f0; border-radius: 9px; background: #eef7fb; color: #4a86a7; }
+      .mini-icon svg { width: 15px; height: 15px; }
+      .row-copy { min-width: 0; flex: 1; }
+      .row-copy strong { display: block; overflow: hidden; color: #36576d; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+      .row-copy small { display: block; margin-top: 3px; color: #84949c; font-size: 9px; }
+      .row-end { color: #6a889a; font-size: 10px; font-weight: 700; }
+      .upload-box { min-height: 66px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px dashed #b8cfdb; border-radius: 11px; background: #f9fcfd; color: #698594; font-size: 10px; }
+      .upload-box svg { width: 17px; height: 17px; }
+      .call-list { display: grid; gap: 8px; }
+      .call-card { display: grid; grid-template-columns: 37px 1fr auto; align-items: center; gap: 9px; padding: 11px; border: 1px solid #e1e9ed; border-radius: 13px; background: white; }
+      .call-icon { width: 37px; height: 37px; display: grid; place-items: center; border: 1px solid #f0d8d2; border-radius: 11px; background: #fff4f1; color: #b85349; font-size: 12px; font-weight: 850; }
+      .call-card strong { display: block; font-size: 11px; }
+      .call-card small { display: block; margin-top: 3px; color: #7c8d97; font-size: 9px; }
+      .call-number { color: #236f9d; font-size: 14px; font-weight: 850; }
+      .notice { padding: 10px 11px; border: 1px solid #e7e9e7; border-radius: 11px; background: #f8faf9; color: #687e8a; font-size: 9px; line-height: 1.55; }
+      .stepper { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+      .step { height: 4px; border-radius: 99px; background: #e6edf1; }
+      .step.active { background: #3a95c3; }
+      .timeline { display: grid; gap: 0; }
+      .timeline-item { position: relative; display: grid; grid-template-columns: 19px 1fr; gap: 9px; min-height: 52px; }
+      .timeline-item:not(:last-child)::after { position: absolute; top: 16px; bottom: -2px; left: 7px; width: 1px; background: #d8e6ed; content: ""; }
+      .timeline-dot { z-index: 1; width: 15px; height: 15px; margin-top: 2px; border: 3px solid #dff2fb; border-radius: 50%; background: #3d99c5; }
+      .timeline-item.pending .timeline-dot { border-color: #eef1f3; background: #bac7ce; }
+      .timeline-copy strong { display: block; font-size: 10px; }
+      .timeline-copy small { display: block; margin-top: 4px; color: #83939b; font-size: 9px; }
+      .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+      .decision-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px; }
+      .decision-row .btn { min-height: 42px; }
+      .detail-stat { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px; }
+      .detail-cell { display: grid; gap: 5px; padding: 9px; border: 1px solid #e0e9ee; border-radius: 10px; }
+      .detail-cell small { color: #81919b; font-size: 9px; }
+      .detail-cell strong { color: #35576b; font-size: 10px; }
+      .map-thumb { position: relative; height: 76px; overflow: hidden; border: 1px solid #dce8ed; border-radius: 10px; background: #eff5ef; }
+      .map-thumb::before { position: absolute; inset: -12px; background: repeating-linear-gradient(30deg, transparent 0 32px, #fff 33px 37px), repeating-linear-gradient(110deg, transparent 0 43px, #dce9e0 44px 49px); content: ""; }
+      .map-thumb::after { position: absolute; top: 27px; left: 48%; width: 18px; height: 18px; border: 4px solid white; border-radius: 50% 50% 50% 3px; transform: rotate(-45deg); background: #368bb7; box-shadow: 0 2px 7px #9ab6bf; content: ""; }
+      .notice.blue { border-color: #d3e9f4; background: #f0f8fc; color: #527b91; }
+      .notice.amber { border-color: #eddfc2; background: #fff9ec; color: #927641; }
+      .notice.rose { border-color: #f0d9d5; background: #fff6f4; color: #a86056; }
+      .empty-photo { min-height: 90px; display: grid; place-items: center; gap: 5px; border: 1px dashed #bdced8; border-radius: 12px; background: #f8fbfc; color: #78909d; font-size: 9px; }
+      .empty-photo svg { width: 20px; height: 20px; }
+      .right-panel { position: sticky; top: 22px; }
+      .flow-card { margin-top: 15px; padding: 13px; border: 1px solid #dfe9ee; border-radius: 13px; background: #fbfdfe; }
+      .flow-card h3 { margin: 0 0 10px; font-size: 12px; }
+      .flow-step { display: grid; grid-template-columns: 20px 1fr; gap: 8px; padding: 6px 0; color: #577183; font-size: 10px; line-height: 1.45; }
+      .flow-step:not(:last-child) .flow-num::after { position: absolute; top: 21px; bottom: -7px; left: 9px; width: 1px; background: #d6e5ec; content: ""; }
+      .flow-num { position: relative; z-index: 1; width: 19px; height: 19px; display: grid; place-items: center; border: 1px solid #cee1eb; border-radius: 7px; background: #eef7fb; color: #3c7c9f; font-size: 9px; font-weight: 800; }
+      .flow-handoff { margin: 13px 0 0; padding: 10px 11px; border-left: 3px solid #64a8cc; border-radius: 0 9px 9px 0; background: #f0f8fc; color: #577789; font-size: 10px; line-height: 1.5; }
+      .right-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 13px; }
+      .right-tags span { padding: 5px 7px; border: 1px solid #e0e9ed; border-radius: 7px; color: #6b8290; font-size: 9px; }
+      .toast { position: fixed; bottom: 20px; left: 50%; z-index: 10; max-width: calc(100vw - 32px); padding: 10px 14px; transform: translateX(-50%); border: 1px solid #c9e0eb; border-radius: 11px; background: #fff; box-shadow: 0 8px 28px rgba(17,50,71,.15); color: #345f76; font-size: 12px; animation: toast-in .2s ease-out; }
+      @keyframes toast-in { from { opacity: 0; transform: translate(-50%, 7px); } to { opacity: 1; transform: translate(-50%, 0); } }
+      @media (max-width: 1050px) { .workbench { grid-template-columns: 218px minmax(360px,1fr); } .right-panel { display: none; } }
+      @media (max-width: 700px) {
+        .page { padding: 17px 12px 24px; }
+        .page-head { align-items: flex-start; margin-bottom: 14px; }
+        .page-head p { max-width: 480px; font-size: 12px; }
+        .edition { align-self: center; padding: 7px 9px; font-size: 10px; }
+        .workbench { grid-template-columns: 1fr; gap: 12px; }
+        .role-panel { padding: 12px; }
+        .role-panel > .panel-kicker, .role-panel > h2, .role-panel > .panel-copy { display: none; }
+        .role-list { display: flex; gap: 7px; overflow-x: auto; margin-top: 0; padding-bottom: 2px; scrollbar-width: none; }
+        .role-button { min-width: max-content; padding: 7px 9px; gap: 7px; }
+        .role-icon { flex-basis: 28px; height: 28px; border-radius: 8px; font-size: 11px; }
+        .role-label strong { font-size: 10px; }
+        .role-label small, .screen-group, .role-note { display: none; }
+        .device-stage { gap: 7px; }
+        .phone { width: min(100%, 410px); height: min(790px, calc(100dvh - 183px)); min-height: 565px; }
+      }
+      @media (max-width: 420px) { .page-head { align-items: flex-start; } .edition { padding: 6px 8px; } .edition span { display: none; } .phone { min-height: 540px; border-radius: 33px; } }
+      @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header class="page-head">
+        <div>
+          <div class="brand-line"><span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s7-6.15 7-12a7 7 0 1 0-14 0c0 5.85 7 12 7 12Z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="9" r="2.5" fill="currentColor"/></svg></span> TownTrack · Product Wireframe</div>
+          <h1>ต้นแบบระบบบน iPhone</h1>
+          <p>สำรวจหน้าจอและเส้นทางงานของทั้ง 5 บทบาท ตั้งแต่ประชาชนแจ้งปัญหา ไปจนถึงทีมภาคสนามและผู้อนุมัติ</p>
+        </div>
+        <div class="edition"><i></i><span>iOS · 393 × 852 pt · OIDC</span></div>
+      </header>
+
+      <section class="workbench" aria-label="ตัวอย่าง wireframe iOS">
+        <aside class="panel role-panel">
+          <div class="panel-kicker">เลือกพื้นที่ทำงาน</div>
+          <h2>5 บทบาท</h2>
+          <p class="panel-copy">สลับบทบาทเพื่อดูหน้าจอและงานที่ต่างกัน</p>
+          <div class="role-list" id="role-list" role="group" aria-label="เลือกบทบาท"></div>
+          <div class="screen-group">
+            <div class="screen-group-title">หน้าจอในบทบาทนี้</div>
+            <div class="screen-list" id="screen-list"></div>
+          </div>
+          <div class="role-note">ตัวสลับบทบาทอยู่ในแผงตัวอย่างนี้เพื่อสำรวจ wireframe เท่านั้น ในแอปจริงแต่ละบทบาทใช้ URL และสิทธิ์ OIDC แยกกัน</div>
+        </aside>
+
+        <section class="device-stage" aria-label="หน้าจอ iPhone">
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="statusbar"><span>9:41</span><span class="status-right"><svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M2 7.8C6.5 3.7 13.5 3.7 18 7.8l-8 9-8-9Z"/></svg><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M2 15V11M6 15V8M10 15V5M14 15V2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="battery"></span></span></div>
+              <header class="phone-head" id="phone-head"></header>
+              <div class="screen-scroll" id="screen-content" tabindex="0"></div>
+              <nav class="bottom-nav" id="bottom-nav" aria-label="เมนูหลัก"></nav>
+              <div class="home-indicator"><span></span></div>
+            </div>
+          </div>
+          <div class="device-caption"><strong id="caption-role"></strong><span></span><span id="caption-screen"></span></div>
+        </section>
+
+        <aside class="panel right-panel">
+          <div class="panel-kicker">เส้นทางงาน</div>
+          <h2 id="flow-title">แจ้งปัญหาในชุมชน</h2>
+          <p class="panel-copy" id="flow-summary"></p>
+          <div class="flow-card"><h3>ขั้นตอนหลัก</h3><div id="flow-steps"></div></div>
+          <div class="flow-handoff" id="flow-handoff"></div>
+          <div class="right-tags"><span>เป้าหมายแตะ ≥ 44 pt</span><span>รองรับ Dynamic Type</span><span>OIDC + PKCE</span></div>
+        </aside>
+      </section>
+    </main>
+    <div class="toast" id="toast" hidden></div>
+
+    <script>
+      const icon = (name) => {
+        const paths = {
+          home: '<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10Z"/>',
+          list: '<path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01" stroke-width="3"/>',
+          alert: '<path d="m12 3 9 16H3l9-16Z"/><path d="M12 9v4m0 3h.01"/>',
+          user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+          plus: '<path d="M12 5v14M5 12h14"/>',
+          pin: '<path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/>',
+          camera: '<path d="M4 7h3l2-3h6l2 3h3v12H4V7Z"/><circle cx="12" cy="13" r="3.5"/>',
+          chevron: '<path d="m15 18-6-6 6-6"/>',
+          bell: '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Zm-8 12h4"/>',
+          clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+          check: '<path d="m5 12 4 4L19 6"/>',
+          upload: '<path d="M12 16V4m0 0L7 9m5-5 5 5M4 20h16"/>',
+          phone: '<path d="M6 3h3l2 5-2 2a14 14 0 0 0 5 5l2-2 5 2v3c0 1-1 2-2 2A17 17 0 0 1 4 5c0-1 1-2 2-2Z"/>',
+          doc: '<path d="M6 3h8l4 4v14H6V3Z"/><path d="M14 3v5h5M9 13h6m-6 4h6"/>',
+          wrench: '<path d="M14 7a5 5 0 0 0-6.5 6.5L3 18l3 3 4.5-4.5A5 5 0 0 0 17 10l-3 3-3-3 3-3Z"/>',
+          arrow: '<path d="M5 12h14m-6-6 6 6-6 6"/>',
+          shield: '<path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/>',
+          layers: '<path d="m12 3 9 5-9 5-9-5 9-5Zm-9 9 9 5 9-5M3 16l9 5 9-5"/>',
+          search: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/>',
+          more: '<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
+          calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/>',
+        };
+        return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.doc}</svg>`;
+      };
+      const roles = {
+        citizen: { short: 'ประชาชน', title: 'ประชาชน', initials: 'ป', description: 'แจ้งและติดตามปัญหา', flow: 'แจ้งปัญหาในชุมชน', summary: 'ส่งเรื่องพร้อมตำแหน่งและหลักฐาน แล้วตรวจสอบความคืบหน้าได้ในแอป', handoff: 'เมื่อส่งเรื่องแล้ว ระบบส่งเข้าคิวเจ้าหน้าที่รับเรื่องเพื่อคัดแยกและมอบหมาย', steps: ['เลือกประเภทและระดับความเร่งด่วน', 'เพิ่มรายละเอียด รูปภาพ และตำแหน่ง', 'ส่งเรื่องและติดตามสถานะจนปิดงาน'], screens: [
+          { id: 'home', label: 'หน้าหลัก', title: 'สวัสดี, คุณสมชาย', sub: 'รายงานและความคืบหน้าในพื้นที่', active: 'home', content: `
+            <div class="screen-content"><div class="hello"><div><div class="eyebrow">ชุมชนของเรา · วันนี้</div><h2>เมืองน่าอยู่ เริ่มที่เรา</h2></div><div class="avatar">ส</div></div>
+              <div class="map-card"><div class="map-grid"></div><div class="map-water"></div><span class="map-place p1">ตลาดชุมชน</span><span class="map-place p2">สวนสาธารณะ</span><span class="map-chip">ปัญหาใกล้ฉัน · 2 กม.</span><span class="pin p-a"></span><span class="pin p-b"></span><span class="pin p-c"></span><span class="map-bottom">ดูแผนที่เต็ม</span></div>
+              <div class="button-row"><button class="btn primary" data-go="report">${icon('plus')}แจ้งปัญหา</button><button class="btn" data-go="track">${icon('search')}ติดตามเรื่อง</button></div>
+              <div><h3 class="section-title">ภาพรวมชุมชน <small>ดูทั้งหมด ›</small></h3><div class="summary-row" style="margin-top:8px"><div class="summary-box blue"><strong>24</strong><span>เรื่องทั้งหมด</span></div><div class="summary-box amber"><strong>8</strong><span>กำลังแก้ไข</span></div><div class="summary-box green"><strong>16</strong><span>ปิดเรื่องแล้ว</span></div></div></div>
+              <div><h3 class="section-title">เรื่องใกล้ตัว <small>ดูเรื่องทั้งหมด ›</small></h3><article class="case-card" style="margin-top:8px" data-go="track"><div class="case-top"><span class="case-id">TT-024 · ถนนชำรุด</span><span class="tag doing">กำลังดำเนินการ</span></div><h3>พื้นถนนหน้าตลาดเป็นหลุมลึก</h3><p>ถนนเทศบาล 4 · 350 ม. จากคุณ</p><div class="case-meta"><span>${icon('clock')}อัปเดต 10 นาทีที่แล้ว</span><span>›</span></div></article></div>
+            </div>` },
+          { id: 'report', label: 'แจ้งปัญหา', title: 'แจ้งปัญหา', sub: 'ส่งเรื่องให้เทศบาลช่วยดูแล', back: 'home', active: 'home', content: `
+            <div class="screen-content"><div class="stepper"><span class="step active"></span><span class="step"></span><span class="step"></span></div><div><div class="eyebrow">ขั้นที่ 1 จาก 3</div><h2 style="margin:4px 0 0;font-size:18px">เล่าให้เรารู้ว่าพบอะไร</h2></div>
+              <div class="field"><label>ประเภทปัญหา</label><div class="selectlike">เลือกประเภทปัญหา <span style="float:right">⌄</span></div></div>
+              <div class="field"><label>ความเร่งด่วน</label><div class="priority-grid"><button class="priority">ทั่วไป</button><button class="priority active">เร่งด่วน</button><button class="priority emergency">ฉุกเฉิน</button></div></div>
+              <div class="field"><label>หัวข้อสั้น ๆ</label><div class="input">เช่น ถนนชำรุดหน้าตลาด</div></div>
+              <div class="field"><label>รายละเอียด</label><div class="textarea">อธิบายตำแหน่งและสิ่งที่เกิดขึ้น เพื่อให้ทีมงานช่วยได้ตรงจุด</div></div>
+              <div class="field"><label>ตำแหน่งปัญหา</label><div class="location-row"><span class="mini-icon">${icon('pin')}</span><span class="row-copy"><strong>ใช้ตำแหน่งปัจจุบัน</strong><small>ถนนเทศบาล 4, ต.ระแหง</small></span><span class="row-end">แก้ไข</span></div></div>
+              <div class="field"><label>ภาพประกอบ</label><button class="upload-box">${icon('camera')}เพิ่มรูปหรือวิดีโอ · สูงสุด 5 ไฟล์</button></div>
+              <button class="btn primary" data-go="report-confirm">ถัดไป · ตรวจสอบข้อมูล ${icon('arrow')}</button></div>` },
+          { id: 'report-confirm', label: 'ตรวจสอบก่อนส่ง', title: 'ตรวจสอบข้อมูล', sub: 'พร้อมส่งคำร้องหรือยัง', back: 'report', active: 'home', content: `
+            <div class="screen-content"><div class="notice blue">ตรวจสอบรายละเอียดและตำแหน่งอีกครั้ง ก่อนส่งเรื่องให้เจ้าหน้าที่</div><article class="case-card"><div class="case-top"><span class="case-id">สรุปคำร้อง</span><span class="tag doing">เร่งด่วน</span></div><h3>ถนนชำรุดหน้าตลาด</h3><p>พื้นถนนหน้าตลาดเป็นหลุมลึก รถจักรยานยนต์อาจเสียหลัก</p><div class="case-meta"><span>${icon('pin')}ถนนเทศบาล 4</span><span>2 ไฟล์</span></div></article><div class="map-thumb"></div><div class="notice">หลังส่งแล้ว ติดตามเลขที่คำร้องและประวัติการดำเนินงานได้จากเมนู “ติดตาม”</div><button class="btn primary" data-go="report-sent">ยืนยันและส่งเรื่อง ${icon('arrow')}</button><button class="btn soft" data-go="report">กลับไปแก้ไข</button></div>` },
+          { id: 'report-sent', label: 'ส่งเรื่องสำเร็จ', title: 'ส่งเรื่องสำเร็จ', sub: 'เราได้รับข้อมูลแล้ว', back: 'home', active: 'home', content: `
+            <div class="screen-content" style="padding-top:30px;text-align:center"><div style="width:64px;height:64px;display:grid;place-items:center;margin:auto;border:1px solid #cce7d9;border-radius:22px;background:#f0faf4;color:#3c9470">${icon('check')}</div><div><div class="eyebrow">รับเรื่องแล้ว</div><h2 style="margin:6px 0;font-size:21px">ขอบคุณที่ช่วยดูแลชุมชน</h2><p style="margin:0;color:#728793;font-size:11px;line-height:1.6">เจ้าหน้าที่จะตรวจสอบข้อมูลและแจ้งความคืบหน้าในแอป</p></div><div class="case-card" style="text-align:left"><div class="eyebrow">เลขที่คำร้อง</div><h3 style="font-size:16px">TT-026</h3><div class="case-meta"><span>ส่งเมื่อ วันนี้ 09:41</span><span class="tag wait">รอรับเรื่อง</span></div></div><button class="btn primary" data-go="track">ติดตามคำร้องนี้</button><button class="btn soft" data-go="home">กลับหน้าหลัก</button></div>` },
+          { id: 'track', label: 'ติดตามเรื่อง', title: 'ติดตามปัญหา', sub: 'รายการแจ้งและรายการที่ติดตาม', back: 'home', active: 'track', content: `
+            <div class="screen-content"><div class="field"><div class="input">${icon('search')}  ค้นหาด้วยเลขที่หรือชื่อปัญหา</div></div><div class="filters"><span class="filter selected">ทั้งหมด 24</span><span class="filter">กำลังแก้ 8</span><span class="filter">ปิดแล้ว 16</span></div>
+              <article class="case-card" data-go="track-detail"><div class="case-top"><span class="case-id">TT-024 · ถนนชำรุด</span><span class="tag doing">กำลังดำเนินการ</span></div><h3>พื้นถนนหน้าตลาดเป็นหลุมลึก</h3><p>ถนนเทศบาล 4 · แจ้ง 14 ต.ค. 2026</p><div class="case-meta"><span>${icon('clock')}อัปเดต 10 นาทีที่แล้ว</span><span>เปิดดู ›</span></div></article>
+              <article class="case-card" data-go="track-detail"><div class="case-top"><span class="case-id">TT-019 · ไฟส่องสว่าง</span><span class="tag wait">รอรับเรื่อง</span></div><h3>ไฟถนนดับตลอดแนวซอย 6</h3><p>ซอยเทศบาล 6 · แจ้ง 12 ต.ค. 2026</p><div class="case-meta"><span>${icon('clock')}อัปเดตเมื่อวาน</span><span>เปิดดู ›</span></div></article>
+              <article class="case-card"><div class="case-top"><span class="case-id">TT-013 · ทางเท้า</span><span class="tag done">ปิดเรื่องแล้ว</span></div><h3>ฝาท่อระบายน้ำชำรุด</h3><p>ถนนประชาร่วมใจ · แจ้ง 9 ต.ค. 2026</p><div class="case-meta"><span>${icon('check')}แก้ไขเรียบร้อย</span><span>เปิดดู ›</span></div></article></div>` },
+          { id: 'track-detail', label: 'รายละเอียดและความคืบหน้า', title: 'รายละเอียดเรื่อง', sub: 'เลขที่ TT-024', back: 'track', active: 'track', content: `
+            <div class="screen-content"><div class="case-top"><span class="tag doing">กำลังดำเนินการ</span><span class="case-id">TT-024</span></div><h2 style="margin:-7px 0 0;font-size:17px">พื้นถนนหน้าตลาดเป็นหลุมลึก</h2><div class="map-thumb"></div><div class="detail-stat"><div class="detail-cell"><small>ประเภท</small><strong>ถนนและทางเท้า</strong></div><div class="detail-cell"><small>ระดับ</small><strong>เร่งด่วน</strong></div><div class="detail-cell"><small>สถานที่</small><strong>ถนนเทศบาล 4</strong></div><div class="detail-cell"><small>วันที่แจ้ง</small><strong>14 ต.ค. 2026</strong></div></div><div><h3 class="section-title">ความคืบหน้า</h3><div class="timeline" style="margin-top:11px"><div class="timeline-item"><span class="timeline-dot"></span><span class="timeline-copy"><strong>กำลังดำเนินการ</strong><small>หัวหน้าทีมลงพื้นที่ตรวจสอบ · วันนี้ 09:30</small></span></div><div class="timeline-item"><span class="timeline-dot"></span><span class="timeline-copy"><strong>รับเรื่องและมอบหมายทีม</strong><small>เจ้าหน้าที่รับเรื่อง · 14 ต.ค. 15:20</small></span></div><div class="timeline-item pending"><span class="timeline-dot"></span><span class="timeline-copy"><strong>ส่งคำร้อง</strong><small>ประชาชน · 14 ต.ค. 10:06</small></span></div></div></div><button class="btn soft">ติดตามการเปลี่ยนแปลง ${icon('bell')}</button></div>` },
+          { id: 'emergency', label: 'ฉุกเฉิน', title: 'แจ้งเหตุฉุกเฉิน', sub: 'โทรหาหน่วยช่วยเหลือได้ทันที', active: 'emergency', content: `
+            <div class="screen-content"><div class="notice rose">หากมีอันตรายต่อชีวิต โทรหน่วยฉุกเฉินโดยตรง ไม่ต้องรอส่งคำร้อง</div><div class="call-list"><div class="call-card"><div class="call-icon">191</div><div><strong>เหตุด่วนเหตุร้าย</strong><small>ตำรวจ · ทั่วประเทศ</small></div><span class="call-number">โทร</span></div><div class="call-card"><div class="call-icon">1669</div><div><strong>แพทย์ฉุกเฉิน</strong><small>อุบัติเหตุหรือเจ็บป่วย</small></div><span class="call-number">โทร</span></div><div class="call-card"><div class="call-icon">199</div><div><strong>เพลิงไหม้และกู้ภัย</strong><small>ดับเพลิงและสาธารณภัย</small></div><span class="call-number">โทร</span></div></div><div><h3 class="section-title">หน่วยงานในพื้นที่</h3><div class="person-row" style="margin-top:8px"><span class="mini-icon">${icon('phone')}</span><span class="row-copy"><strong>ป้องกันและบรรเทาสาธารณภัย</strong><small>เทศบาลตำบลระแหง</small></span><span class="row-end">โทร</span></div></div><div class="notice">เพื่อความปลอดภัย ตรวจสอบหมายเลขและพื้นที่ให้บริการกับหน่วยงานก่อนเปิดใช้จริง</div></div>` },
+        ] },
+        staff: { short: 'รับเรื่อง', title: 'เจ้าหน้าที่รับเรื่อง', initials: 'ร', description: 'คัดแยกและส่งต่อ', flow: 'คัดแยกและมอบหมาย', summary: 'รวมเรื่องซ้ำ แยกระดับความเร่งด่วน และส่งเรื่องไปยังทีมที่รับผิดชอบ', handoff: 'เรื่องทั่วไปส่งเข้าคิวทีมพื้นที่ ส่วนงบประมาณหรือคำสั่งส่งผู้มีอำนาจพิจารณา', steps: ['ตรวจข้อมูลและหลักฐานที่ประชาชนส่ง', 'รวมรายการซ้ำ หรือแยกเรื่องตามสาเหตุ', 'รับเรื่องและส่งต่อหน่วยงาน / หัวหน้าทีม'], screens: [
+          { id: 'inbox', label: 'กล่องรับเรื่อง', title: 'กล่องรับเรื่อง', sub: 'เรื่องใหม่และเรื่องที่ต้องคัดแยก', active: 'inbox', content: `
+            <div class="screen-content"><div class="hello"><div><div class="eyebrow">งานรับเรื่อง · วันนี้</div><h2>สวัสดี เจ้าหน้าที่</h2></div><div class="avatar">ร</div></div><div class="summary-row"><div class="summary-box blue"><strong>18</strong><span>เรื่องใหม่</span></div><div class="summary-box amber"><strong>4</strong><span>เร่งด่วน</span></div><div class="summary-box" style="background:#fff6f4"><strong style="color:#b95b51">2</strong><span>ฉุกเฉิน</span></div></div><div class="filters"><span class="filter selected">ทั้งหมด</span><span class="filter">ฉุกเฉิน</span><span class="filter">เร่งด่วน</span><span class="filter">ทั่วไป</span></div>
+              <article class="inbox-card" data-go="intake-detail"><div class="card-top"><span class="case-id">TT-026 · 09:41</span><span class="tag wait">ฉุกเฉิน</span></div><h3>กิ่งไม้พาดสายไฟ มีประกายไฟ</h3><p>หมู่ 3 ถนนเลียบคลอง · มีรูป 2 ไฟล์</p><div class="case-meta"><span>ไฟฟ้า / สาธารณภัย</span><span>ตรวจเรื่อง ›</span></div></article>
+              <article class="inbox-card" data-go="intake-detail"><div class="card-top"><span class="case-id">TT-025 · 09:17</span><span class="tag doing">เร่งด่วน</span></div><h3>น้ำประปารั่วขังหน้าบ้านเลขที่ 18</h3><p>ถนนประชาร่วมใจ · คล้าย TT-021</p><div class="case-meta"><span>ประปา · พบเรื่องใกล้เคียง</span><span>ตรวจเรื่อง ›</span></div></article>
+              <article class="inbox-card"><div class="card-top"><span class="case-id">TT-023 · เมื่อวาน</span><span class="tag">ทั่วไป</span></div><h3>ขอเพิ่มถังขยะบริเวณสวน</h3><p>ชุมชนริมคลอง · มีรูป 1 ไฟล์</p><div class="case-meta"><span>สิ่งแวดล้อม</span><span>ตรวจเรื่อง ›</span></div></article></div>` },
+          { id: 'intake-detail', label: 'ตรวจและจัดประเภท', title: 'ตรวจรับเรื่อง', sub: 'TT-026 · ยืนยันข้อมูลก่อนส่งต่อ', back: 'inbox', active: 'inbox', content: `
+            <div class="screen-content"><div class="case-top"><span class="tag wait">ฉุกเฉิน</span><span class="case-id">TT-026</span></div><h2 style="margin:-7px 0 0;font-size:17px">กิ่งไม้พาดสายไฟ มีประกายไฟ</h2><div class="notice rose">ความเสี่ยงด้านความปลอดภัย · ประสานหน่วยฉุกเฉินตามแนวปฏิบัติ</div><div class="map-thumb"></div><div class="detail-stat"><div class="detail-cell"><small>แจ้งโดย</small><strong>ประชาชน · 09:41</strong></div><div class="detail-cell"><small>หมวดงาน</small><strong>ไฟฟ้า / สาธารณภัย</strong></div></div><div class="empty-photo">${icon('camera')}หลักฐานภาพ 2 ไฟล์</div><div class="field"><label>จัดหมวดและผู้รับผิดชอบ</label><div class="selectlike">สาธารณภัย / งานป้องกันฯ <span style="float:right">⌄</span></div></div><div class="two-col"><button class="btn soft">${icon('layers')}รวมกับ TT-021</button><button class="btn soft">${icon('plus')}แยกเป็น 2 เรื่อง</button></div><div class="decision-row"><button class="btn primary" data-go="inbox">รับเรื่องและส่งต่อ</button><button class="btn danger">ขอข้อมูลเพิ่ม</button></div></div>` },
+        ] },
+        supervisor: { short: 'หัวหน้าทีม', title: 'หัวหน้าทีมภาคสนาม', initials: 'ห', description: 'วางแผนและจัดทีม', flow: 'วางแผนทีมภาคสนาม', summary: 'จัดผู้ลงพื้นที่ ประเมินทรัพยากร และตรวจคุณภาพงานก่อนส่งปิดเรื่อง', handoff: 'เมื่ออนุมัติแผนแล้ว งานจะเข้าคิวผู้ลงพื้นที่ พร้อมกำหนดวันนัดและข้อมูลหน้างาน', steps: ['ประเมินความเร่งด่วนและทรัพยากร', 'เลือกผู้ลงพื้นที่และกำหนดวันทำงาน', 'ติดตามหลักฐานและตรวจงานก่อนส่งเทศบาล'], screens: [
+          { id: 'team', label: 'วางแผนและจัดทีม', title: 'วางแผนทีม', sub: 'คิวงานและกำลังคนภาคสนาม', active: 'team', content: `
+            <div class="screen-content"><div class="hello"><div><div class="eyebrow">ทีมภาคสนาม · ทีม A</div><h2>งานที่ต้องวางแผน</h2></div><div class="avatar">ห</div></div><div class="summary-row"><div class="summary-box blue"><strong>7</strong><span>รอจัดทีม</span></div><div class="summary-box amber"><strong>3</strong><span>กำลังทำ</span></div><div class="summary-box green"><strong>5</strong><span>รอตรวจ</span></div></div><div class="filters"><span class="filter selected">งานทั้งหมด</span><span class="filter">เร่งด่วน</span><span class="filter">รอตรวจ</span></div><article class="task-card"><div class="card-top"><span class="case-id">TT-024 · ถนน</span><span class="tag doing">เร่งด่วน</span></div><h3>พื้นถนนหน้าตลาดเป็นหลุมลึก</h3><p>เดินทาง 1.4 กม. · ประเมิน 2 คน · อุปกรณ์ซ่อมผิวทาง</p><div class="person-row" style="margin-top:10px"><span class="mini-icon">${icon('user')}</span><span class="row-copy"><strong>ช่างภาคสนาม</strong><small>ยังไม่ได้จัดผู้รับผิดชอบ</small></span><span class="row-end">เลือก ›</span></div><div class="case-meta"><span>${icon('calendar')}กำหนดวันทำงาน</span><span>15 ต.ค. ›</span></div><button class="btn primary" style="width:100%;margin-top:10px" data-go="plan-detail">วางแผนและจัดทีม</button></article><article class="task-card"><div class="card-top"><span class="case-id">TT-018 · ไฟฟ้า</span><span class="tag">ทั่วไป</span></div><h3>เปลี่ยนหลอดไฟถนนซอย 6</h3><p>มอบหมายทีม B แล้ว · นัด 16 ต.ค.</p></article></div>` },
+          { id: 'plan-detail', label: 'มอบหมายและทรัพยากร', title: 'รายละเอียดแผนงาน', sub: 'TT-024 · ถนนชำรุด', back: 'team', active: 'team', content: `
+            <div class="screen-content"><div class="case-top"><span class="tag doing">เร่งด่วน</span><span class="case-id">TT-024</span></div><h2 style="margin:-7px 0 0;font-size:16px">พื้นถนนหน้าตลาดเป็นหลุมลึก</h2><div class="map-thumb"></div><div class="field"><label>ผู้ลงพื้นที่</label><div class="selectlike">เลือกเจ้าหน้าที่ภาคสนาม <span style="float:right">⌄</span></div></div><div class="field"><label>วันและเวลานัด</label><div class="input">15 ต.ค. 2026 · 09:00 น.</div></div><div><h3 class="section-title">ประเมินทรัพยากร</h3><div class="resource-row" style="margin-top:8px"><span class="mini-icon">${icon('wrench')}</span><span class="row-copy"><strong>ทีมซ่อมผิวทาง · 2 คน</strong><small>ยางมะตอยสำเร็จรูป · เครื่องตัด</small></span><span class="row-end">แก้ไข</span></div></div><div class="notice amber">ใช้งบหรือคำสั่งเพิ่มเติม? ส่งข้อเสนอเพื่อรอผู้มีอำนาจพิจารณาก่อนเริ่มงาน</div><button class="btn primary">ยืนยันทีมและกำหนดงาน</button><button class="btn soft">ส่งขอทรัพยากรเพิ่มเติม</button></div>` },
+        ] },
+        worker: { short: 'ภาคสนาม', title: 'เจ้าหน้าที่ภาคสนาม', initials: 'ภ', description: 'ลงพื้นที่และส่งรายงาน', flow: 'ทำงานและรายงานผล', summary: 'รับงาน ดูจุดเกิดเหตุ บันทึกภาพก่อน–หลัง และส่งรายงานให้หัวหน้าตรวจ', handoff: 'เมื่อส่งรายงาน หัวหน้าทีมตรวจคุณภาพ หากผ่านจะส่งให้เทศบาลตรวจรับและปิดเรื่อง', steps: ['รับหรือปฏิเสธงานพร้อมเหตุผล', 'เริ่มงานและแนบหลักฐานก่อนทำ', 'บันทึกผล ภาพหลังทำ และส่งให้หัวหน้าตรวจ'], screens: [
+          { id: 'field', label: 'งานที่ได้รับมอบหมาย', title: 'งานของฉัน', sub: 'งานวันนี้และงานที่กำลังทำ', active: 'field', content: `
+            <div class="screen-content"><div class="hello"><div><div class="eyebrow">ภาคสนาม · วันนี้</div><h2>สวัสดี ช่างสมชาย</h2></div><div class="avatar">ภ</div></div><div class="summary-row"><div class="summary-box blue"><strong>3</strong><span>งานวันนี้</span></div><div class="summary-box amber"><strong>1</strong><span>กำลังทำ</span></div><div class="summary-box green"><strong>2</strong><span>เสร็จแล้ว</span></div></div><div class="filters"><span class="filter selected">วันนี้</span><span class="filter">ทั้งหมด</span><span class="filter">ส่งรายงานแล้ว</span></div><article class="task-card" data-go="field-detail"><div class="card-top"><span class="case-id">นัด 09:00 · TT-024</span><span class="tag doing">เร่งด่วน</span></div><h3>ซ่อมผิวถนนหน้าตลาด</h3><p>ถนนเทศบาล 4 · ห่างจากตำแหน่งปัจจุบัน 1.4 กม.</p><div class="map-thumb" style="margin-top:10px"></div><div class="person-row" style="margin-top:9px"><span class="mini-icon">${icon('pin')}</span><span class="row-copy"><strong>เปิดแผนที่นำทาง</strong><small>จุดปัญหาและพิกัดงาน</small></span><span class="row-end">เปิด ›</span></div><button class="btn primary" style="width:100%;margin-top:10px" data-go="field-detail">เปิดใบงาน</button></article><article class="task-card"><div class="card-top"><span class="case-id">นัด 13:30 · TT-021</span><span class="tag">ทั่วไป</span></div><h3>เปลี่ยนฝาท่อระบายน้ำ</h3><p>ชุมชนริมคลอง · ห่าง 2.1 กม.</p></article></div>` },
+          { id: 'field-detail', label: 'บันทึกผลและหลักฐาน', title: 'ใบงานภาคสนาม', sub: 'TT-024 · ซ่อมผิวถนน', back: 'field', active: 'field', content: `
+            <div class="screen-content"><div class="case-top"><span class="tag doing">กำลังดำเนินการ</span><span class="case-id">TT-024</span></div><h2 style="margin:-7px 0 0;font-size:16px">ซ่อมผิวถนนหน้าตลาด</h2><div class="detail-stat"><div class="detail-cell"><small>สถานที่</small><strong>ถนนเทศบาล 4</strong></div><div class="detail-cell"><small>หัวหน้าทีม</small><strong>หัวหน้าทีม A</strong></div></div><button class="btn soft" style="width:100%">${icon('pin')}เปิดแผนที่นำทาง</button><div class="notice blue">บันทึกภาพก่อนเริ่มงาน เพื่อใช้เปรียบเทียบกับผลหลังดำเนินการ</div><div class="field"><label>ภาพก่อนทำ · จำเป็น</label><div class="empty-photo">${icon('camera')}ถ่ายหรือเลือกรูปก่อนทำ</div></div><div class="field"><label>สรุปการดำเนินงาน</label><div class="textarea">ระบุสิ่งที่ทำ จำนวนวัสดุ และผลการแก้ไข</div></div><div class="field"><label>ภาพหลังทำ · จำเป็น</label><div class="empty-photo">${icon('camera')}ถ่ายหรือเลือกรูปหลังทำ</div></div><div class="notice">ตรวจสอบว่าไม่มีข้อมูลส่วนบุคคลของผู้สัญจรติดในภาพ ก่อนส่งรายงาน</div><button class="btn primary">ส่งรายงานให้หัวหน้าตรวจ ${icon('arrow')}</button></div>` },
+        ] },
+        authority: { short: 'ผู้อนุมัติ', title: 'ผู้บริหาร / ผู้อนุมัติ', initials: 'ผ', description: 'พิจารณางบและคำสั่ง', flow: 'พิจารณาข้อเสนอ', summary: 'ตรวจที่มา รายละเอียด งบประมาณและเอกสาร ก่อนอนุมัติหรือขอข้อมูลเพิ่ม', handoff: 'ข้อเสนอที่อนุมัติจะกลับไปยังเจ้าหน้าที่หรือหัวหน้าทีม เพื่อดำเนินการตามคำสั่ง', steps: ['เปิดข้อเสนอและตรวจเอกสารประกอบ', 'อนุมัติ ไม่อนุมัติ หรือขอข้อมูลเพิ่มพร้อมเหตุผล', 'ส่งผลพิจารณากลับผู้เสนอและเก็บประวัติ'], screens: [
+          { id: 'approvals', label: 'คิวพิจารณา', title: 'คิวพิจารณา', sub: 'ข้อเสนองบประมาณและคำสั่ง', active: 'approvals', content: `
+            <div class="screen-content"><div class="hello"><div><div class="eyebrow">ผู้อนุมัติ · วันนี้</div><h2>รายการรอพิจารณา</h2></div><div class="avatar">ผ</div></div><div class="summary-row"><div class="summary-box blue"><strong>6</strong><span>รอพิจารณา</span></div><div class="summary-box amber"><strong>2</strong><span>ขอข้อมูลเพิ่ม</span></div><div class="summary-box green"><strong>9</strong><span>อนุมัติแล้ว</span></div></div><div class="filters"><span class="filter selected">ทั้งหมด</span><span class="filter">งบประมาณ</span><span class="filter">คำสั่ง</span></div><article class="approval-card" data-go="approval-detail"><div class="card-top"><span class="case-id">ข้อเสนอ B-008 · TT-024</span><span class="tag wait">รอพิจารณา</span></div><h3>ขออนุมัติงบซ่อมผิวถนนหน้าตลาด</h3><p>เสนอโดย เจ้าหน้าที่รับเรื่อง · 14 ต.ค. 2026</p><div class="approval-meta" style="margin-top:10px"><span class="mini-icon">${icon('doc')}</span><span class="row-copy"><strong>วงเงินเสนอ 18,500 บาท</strong><small>ใบเสนอราคา 2 รายการ · ภาพพื้นที่</small></span><span class="row-end">›</span></div></article><article class="approval-card"><div class="card-top"><span class="case-id">ข้อเสนอ L-004 · TT-019</span><span class="tag doing">ขอข้อมูลเพิ่ม</span></div><h3>ขออนุมัติคำสั่งประสานการไฟฟ้า</h3><p>ต้องแนบหนังสือรับรองเขตพื้นที่</p><div class="case-meta"><span>รอผู้เสนอแก้ไข</span><span>ดูรายละเอียด ›</span></div></article></div>` },
+          { id: 'approval-detail', label: 'ตรวจข้อเสนอและตัดสินใจ', title: 'รายละเอียดข้อเสนอ', sub: 'B-008 · งบประมาณ · TT-024', back: 'approvals', active: 'approvals', content: `
+            <div class="screen-content"><div class="case-top"><span class="tag wait">รอพิจารณา</span><span class="case-id">B-008</span></div><h2 style="margin:-7px 0 0;font-size:16px">ขออนุมัติงบซ่อมผิวถนนหน้าตลาด</h2><p style="margin:-9px 0 0;color:#788b96;font-size:10px;line-height:1.5">ผู้เสนอ: เจ้าหน้าที่รับเรื่อง · อ้างอิง TT-024</p><div class="detail-stat"><div class="detail-cell"><small>วงเงินเสนอ</small><strong>18,500 บาท</strong></div><div class="detail-cell"><small>ประเภท</small><strong>งบซ่อมบำรุง</strong></div><div class="detail-cell"><small>รายการวัสดุ</small><strong>ยางมะตอย · 12 ถุง</strong></div><div class="detail-cell"><small>กำหนดใช้</small><strong>ภายใน 7 วัน</strong></div></div><article class="case-card"><div class="eyebrow">เหตุผลประกอบ</div><p style="margin-top:6px;color:#516d7d">พื้นถนนเป็นหลุมและอยู่หน้าตลาด มีประชาชนใช้ทางจำนวนมาก ขออนุมัติวัสดุเพื่อซ่อมเร่งด่วน</p></article><div class="empty-photo">${icon('doc')}เอกสารและหลักฐาน 3 ไฟล์</div><div class="field"><label>หมายเหตุถึงผู้เสนอ</label><div class="textarea">บันทึกเหตุผลหรือเงื่อนไขประกอบการพิจารณา</div></div><div class="decision-row"><button class="btn primary" data-go="approvals">อนุมัติ</button><button class="btn soft">ขอข้อมูลเพิ่ม</button></div><button class="btn danger">ไม่อนุมัติ</button></div>` },
+        ] },
+      };
+      Object.values(roles).forEach((role) => {
+        const landing = role.screens[0].id;
+        role.screens.push({
+          id: 'signin', label: 'เข้าสู่ระบบ OIDC', title: 'เข้าสู่ระบบ', sub: role.title,
+          content: `<div class="screen-content" style="min-height:100%;align-content:center;padding-bottom:22px"><div style="display:grid;justify-items:center;gap:11px;text-align:center"><div class="avatar" style="width:58px;height:58px;border-radius:19px;font-size:20px">${role.initials}</div><div><div class="eyebrow">TownTrack · พื้นที่ทำงานเฉพาะบทบาท</div><h2 style="margin:7px 0 4px;font-size:21px">${role.title}</h2><p style="margin:0;color:#788d99;font-size:11px;line-height:1.55">เข้าสู่ระบบด้วยบัญชีหน่วยงานของคุณ เพื่อเข้าถึงข้อมูลและงานที่ได้รับมอบหมาย</p></div></div><div class="notice blue">ระบบจะเปิดหน้าลงชื่อเข้าใช้ของหน่วยงานในเบราว์เซอร์ แล้วกลับมายังแอปโดยอัตโนมัติ</div><button class="btn primary" style="width:100%;min-height:48px" data-go="${landing}">เข้าสู่ระบบด้วยบัญชีหน่วยงาน ${icon('arrow')}</button><button class="btn soft" style="width:100%">เกี่ยวกับการยืนยันตัวตน</button><div class="case-meta"><span>OIDC · Authorization Code + PKCE</span><span>เชื่อมต่ออย่างปลอดภัย</span></div></div>`
+        });
+      });
+      const iconsByRole = { citizen: ['pin','ประชาชน'], staff: ['doc','รับ'], supervisor: ['layers','หัวหน้า'], worker: ['wrench','ช่าง'], authority: ['shield','อนุมัติ'] };
+      const navMap = {
+        citizen: [['home','หน้าหลัก','home'],['track','ติดตาม','list'],['emergency','ฉุกเฉิน','alert'],['home','บัญชี','user']],
+        staff: [['inbox','คิวงาน','list'],['intake-detail','รับเรื่อง','doc'],['inbox','ค้นหา','search'],['inbox','อื่น ๆ','more']],
+        supervisor: [['team','ภาพรวม','home'],['plan-detail','ทีม','user'],['team','แผนงาน','calendar'],['team','อื่น ๆ','more']],
+        worker: [['field','งานของฉัน','list'],['field-detail','บันทึกผล','camera'],['field','แผนที่','pin'],['field','อื่น ๆ','more']],
+        authority: [['approvals','คิวอนุมัติ','doc'],['approval-detail','ประวัติ','clock'],['approvals','รายงาน','layers'],['approvals','อื่น ๆ','more']],
+      };
+      let activeRole = 'citizen';
+      let activeScreen = 'home';
+      let toastTimer;
+      const roleList = document.getElementById('role-list');
+      const screenList = document.getElementById('screen-list');
+      const screenContent = document.getElementById('screen-content');
+      const phoneHead = document.getElementById('phone-head');
+      const bottomNav = document.getElementById('bottom-nav');
+      const toast = document.getElementById('toast');
+      function currentScreen() { return roles[activeRole].screens.find((screen) => screen.id === activeScreen) || roles[activeRole].screens[0]; }
+      function render() {
+        const role = roles[activeRole];
+        const screen = currentScreen();
+        roleList.innerHTML = Object.entries(roles).map(([id, item]) => {
+          const [glyph] = iconsByRole[id];
+          return `<button class="role-button" data-role="${id}" aria-pressed="${id === activeRole}"><span class="role-icon">${glyph === 'user' ? icon('user') : item.initials}</span><span class="role-label"><strong>${item.title}</strong><small>${item.description}</small></span></button>`;
+        }).join('');
+        screenList.innerHTML = role.screens.map((item, index) => `<button class="screen-button" data-screen="${item.id}" aria-current="${item.id === screen.id ? 'page' : 'false'}"><span class="screen-number">${String(index + 1).padStart(2, '0')}</span>${item.label}</button>`).join('');
+        phoneHead.innerHTML = `${screen.back ? `<button class="back-button" data-go="${screen.back}" aria-label="ย้อนกลับ">${icon('chevron')}</button>` : ''}<div class="phone-title"><strong>${screen.title}</strong><small>${screen.sub || role.title}</small></div>${screen.back ? '' : `<button class="head-action" aria-label="การแจ้งเตือน">${icon('bell')}</button>`}`;
+        screenContent.innerHTML = screen.content;
+        bottomNav.hidden = screen.id === 'signin';
+        bottomNav.innerHTML = navMap[activeRole].map(([target, label, glyph]) => `<button class="nav-item ${screen.active === target || (screen.active === 'inbox' && target === 'inbox') || (screen.active === 'approvals' && target === 'approvals') || (screen.active === 'team' && target === 'team') || (screen.active === 'field' && target === 'field') ? 'active' : ''}" data-go="${target}">${icon(glyph)}<span>${label}</span></button>`).join('');
+        document.getElementById('caption-role').textContent = role.title;
+        document.getElementById('caption-screen').textContent = screen.label;
+        document.getElementById('flow-title').textContent = role.flow;
+        document.getElementById('flow-summary').textContent = role.summary;
+        document.getElementById('flow-handoff').textContent = role.handoff;
+        document.getElementById('flow-steps').innerHTML = role.steps.map((step, index) => `<div class="flow-step"><span class="flow-num">${index + 1}</span><span>${step}</span></div>`).join('');
+      }
+      function go(id) {
+        const target = roles[activeRole].screens.find((screen) => screen.id === id);
+        if (!target) return;
+        activeScreen = id;
+        render();
+        screenContent.scrollTop = 0;
+      }
+      function showToast(message) {
+        toast.textContent = message;
+        toast.hidden = false;
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => { toast.hidden = true; }, 1800);
+      }
+      document.addEventListener('click', (event) => {
+        const roleButton = event.target.closest('[data-role]');
+        if (roleButton) { activeRole = roleButton.dataset.role; activeScreen = roles[activeRole].screens[0].id; render(); return; }
+        const screenButton = event.target.closest('[data-screen]');
+        if (screenButton) { go(screenButton.dataset.screen); return; }
+        const navigation = event.target.closest('[data-go]');
+        if (navigation) { go(navigation.dataset.go); return; }
+        const action = event.target.closest('.btn, .call-card, .filter, .priority, .upload-box, .selectlike, .location-row, .person-row, .approval-meta');
+        if (action) {
+          if (action.classList.contains('filter')) { action.parentElement.querySelectorAll('.filter').forEach((item) => item.classList.remove('selected')); action.classList.add('selected'); }
+          else if (action.classList.contains('priority')) { action.parentElement.querySelectorAll('.priority').forEach((item) => item.classList.remove('active')); action.classList.add('active'); }
+          else showToast('ตัวอย่าง wireframe · แสดงหน้าตาและเส้นทางการใช้งาน');
+        }
+      });
+      render();
+    </script>
+  </body>
+</html>

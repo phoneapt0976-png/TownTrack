@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">TownTrack</string>
+    <string name="title_activity_main">TownTrack</string>
+    <string name="package_name">com.towntrack.app</string>
+    <string name="custom_url_scheme">com.towntrack.app</string>
+</resources>
