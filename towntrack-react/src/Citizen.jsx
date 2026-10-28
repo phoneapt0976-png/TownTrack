@@ -63,6 +63,7 @@ const CATEGORY_OPTIONS = [
   { value: "ไฟฟ้าส่องสว่าง", label: "ไฟดับ / ไฟส่องทาง", Icon: Zap },
   { value: "กิ่งไม้/ความปลอดภัย", label: "ต้นไม้ล้ม / กิ่งไม้", Icon: Trees },
 ];
+
 function VoteFollow({ issue, compact = false }) {
   const { act, busy, actor } = useStore(),
     voted = issue.voters.includes(actor.id),
@@ -100,11 +101,12 @@ function VoteFollow({ issue, compact = false }) {
     </div>
   );
 }
+
 function SatisfactionModal({ issue, onClose }) {
   const { act, busy } = useStore();
   const [score, setScore] = useState(0);
   const [comment, setComment] = useState("");
-  const submit = async (event) => {
+  const submitModal = async (event) => {
     event.preventDefault();
     if (!score) return;
     const saved = await act(
@@ -116,7 +118,7 @@ function SatisfactionModal({ issue, onClose }) {
   const labels = ["ควรปรับปรุงมาก", "ควรปรับปรุง", "ปานกลาง", "พึงพอใจ", "พึงพอใจมาก"];
   return (
     <Modal title="ประเมินความพึงพอใจ" onClose={onClose}>
-      <form className="satisfaction-form" onSubmit={submit}>
+      <form className="satisfaction-form" onSubmit={submitModal}>
         <span className="satisfaction-kicker">เรื่องปิดแล้ว · {issue.id}</span>
         <h3>{issue.title}</h3>
         <p>การแก้ไขปัญหาเรื่องนี้ตรงกับความคาดหวังของคุณแค่ไหน</p>
@@ -156,6 +158,7 @@ function SatisfactionModal({ issue, onClose }) {
     </Modal>
   );
 }
+
 function CitizenCorrectionForm({ issue, onClose }) {
   const { act, busy, notify } = useStore();
   const [data, setData] = useState({
@@ -271,6 +274,7 @@ function CitizenCorrectionForm({ issue, onClose }) {
     </Modal>
   );
 }
+
 function CitizenNav({ page, go, open, setOpen }) {
   const navRef = useRef(null);
   useEffect(() => {
@@ -295,6 +299,7 @@ function CitizenNav({ page, go, open, setOpen }) {
       trigger?.focus({ preventScroll: true });
     };
   }, [open, setOpen]);
+
   useEffect(() => {
     if (!open) return undefined;
     const previousOverflow = document.body.style.overflow;
@@ -303,6 +308,7 @@ function CitizenNav({ page, go, open, setOpen }) {
       document.body.style.overflow = previousOverflow;
     };
   }, [open]);
+
   const active = ["nearby", "form"].includes(page)
     ? "report"
     : ["tracking", "detail"].includes(page)
@@ -370,6 +376,7 @@ function CitizenNav({ page, go, open, setOpen }) {
     </div>
   );
 }
+
 export default function Citizen({ navOpen, setNavOpen }) {
   const { db, act, busy, notify, actor, citizenIdentity } = useStore();
   const geo = useGeolocation();
@@ -456,6 +463,8 @@ export default function Citizen({ navOpen, setNavOpen }) {
   useEffect(() => {
     if (trackPage > trackPages) setTrackPage(trackPages);
   }, [trackPage, trackPages]);
+
+  // ฟังก์ชันส่งข้อมูลเข้า Neon ฐานข้อมูลโดยตรง
   const submit = async (event) => {
     event.preventDefault();
     if (!form.description.trim()) {
@@ -472,19 +481,35 @@ export default function Citizen({ navOpen, setNavOpen }) {
       notify("กรุณาแนบรูปหลักฐานหรือวิดีโออย่างน้อย 1 ไฟล์", true);
       return;
     }
-    const created = await act(
-      "CREATE",
-      null,
-      { ...form, media },
-      "ส่งคำร้องสำเร็จ",
-    );
-    if (created) {
-      setReceipt(created.id);
+
+    try {
+      const { neon } = await import('@neondatabase/serverless');
+      // ⚠️ นำลิงก์เชื่อมต่อ Neon ของคุณมาใส่แทนข้อความด้านล่างนี้ (เช่น "postgresql://...")
+      const sql = neon("postgresql://neondb_owner:npg_HmAiMfy2qU5N@ep-noisy-truth-b5sf63d2-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require");
+
+      await sql`
+        INSERT INTO reports (title, description, location, citizen_id)
+        VALUES (
+          ${form.title || form.category}, 
+          ${form.description}, 
+          ${form.place}, 
+          ${actor.id}
+        )
+      `;
+
+      notify("ส่งคำร้องสำเร็จ ข้อมูลบันทึกลง Neon เรียบร้อย!");
+      const fakeId = "REQ-" + Math.floor(1000 + Math.random() * 9000);
+      setReceipt(fakeId);
       setPage("receipt");
       setMedia([]);
       setForm({ ...form, title: "", description: "" });
+
+    } catch (error) {
+      console.error(error);
+      notify("ไม่สามารถเชื่อมต่อฐานข้อมูล Neon ได้", true);
     }
   };
+
   const locationNotice = (geo.pending || geo.error) && (
     <aside className="citizen-location-notice" role={geo.error ? "alert" : "status"}>
       <LocateFixed size={22} aria-hidden="true" />
@@ -496,6 +521,7 @@ export default function Citizen({ navOpen, setNavOpen }) {
       </div>
     </aside>
   );
+
   if (page === "portal")
     return (
       <div className="citizen-nav-host">
@@ -511,6 +537,7 @@ export default function Citizen({ navOpen, setNavOpen }) {
         </div>
       </div>
     );
+
   return (
     <div className="citizen-nav-host">
       <CitizenNav page={page} go={go} open={navOpen} setOpen={setNavOpen} />

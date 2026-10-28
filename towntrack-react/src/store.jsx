@@ -7,32 +7,40 @@ import React, {
   useRef,
 } from "react";
 import {
-  initialize,
   transition,
   PEOPLE,
   CURRENT_CITIZEN,
   expireIncompleteCases,
+  USER_LOCATION, // 👉 เพิ่มการเรียกใช้พิกัดแผนที่เริ่มต้น ป้องกันแอปพัง
 } from "./model";
-import { upgradeDemo } from "./demo.js";
-const KEY = "towntrack-react-v1";
+
+const KEY = "towntrack-react-v4";
 const CITIZEN_KEY = "towntrack-line-citizen-v1";
 const Store = createContext(null);
+
 const valid = (d) =>
   d?.schema === 1 &&
   Array.isArray(d.issues) &&
   d.issues.every(
     (i) => i.id && Array.isArray(i.history) && Number.isInteger(i.revision),
   );
+
 function restore() {
   const raw = localStorage.getItem(KEY);
-  if (!raw) return initialize();
-  const d = JSON.parse(raw);
-  if (!valid(d)) throw Error("ข้อมูลที่บันทึกไม่ถูกต้อง");
-  const upgraded = upgradeDemo(d),
-    expired = expireIncompleteCases(upgraded);
-  if (expired.changed) localStorage.setItem(KEY, JSON.stringify(expired.db));
-  return expired.db;
+  if (!raw) return { schema: 1, issues: [] };
+  try {
+    const d = JSON.parse(raw);
+    if (!valid(d)) {
+      return { schema: 1, issues: [] };
+    }
+    const expired = expireIncompleteCases(d);
+    if (expired.changed) localStorage.setItem(KEY, JSON.stringify(expired.db));
+    return expired.db;
+  } catch {
+    return { schema: 1, issues: [] };
+  }
 }
+
 function readCitizenIdentity() {
   try {
     const identity = JSON.parse(localStorage.getItem(CITIZEN_KEY));
@@ -41,6 +49,7 @@ function readCitizenIdentity() {
     return null;
   }
 }
+
 let dbPromise;
 function mediaDB() {
   return (dbPromise ||= new Promise((resolve, reject) => {
@@ -53,6 +62,7 @@ function mediaDB() {
     };
   }));
 }
+
 async function files(mode, operation) {
   const db = await mediaDB();
   return new Promise((resolve, reject) => {
@@ -68,7 +78,9 @@ async function files(mode, operation) {
     tx.onerror = tx.onabort = () => reject(Error("บันทึกไฟล์ไม่สำเร็จ"));
   });
 }
+
 export const getMedia = (id) => files("readonly", (s) => s.get(id));
+
 const allowed = [
   "image/jpeg",
   "image/png",
@@ -77,6 +89,7 @@ const allowed = [
   "video/webm",
   "video/quicktime",
 ];
+
 export function validateFiles(list) {
   if (list.length > 5) throw Error("แนบได้สูงสุด 5 ไฟล์ต่อช่อง");
   for (const f of list) {
@@ -86,6 +99,7 @@ export function validateFiles(list) {
       throw Error("แต่ละไฟล์ต้องมีขนาดน้อยกว่า 10 MB");
   }
 }
+
 async function encodeUploads(payload) {
   const out = { ...payload },
     uploads = [];
@@ -106,6 +120,7 @@ async function encodeUploads(payload) {
   }
   return { payload: out, uploads };
 }
+
 export function Provider({ children }) {
   const actionLock = useRef(false);
   const [loadError, setLoadError] = useState("");
@@ -113,9 +128,10 @@ export function Provider({ children }) {
     try {
       return restore();
     } catch {
-      return initialize();
+      return { schema: 1, issues: [] };
     }
   });
+
   const [citizenIdentity, setCitizenIdentityState] = useState(readCitizenIdentity);
   const [role] = useState(() => {
     const segment = location.pathname
@@ -130,14 +146,67 @@ export function Provider({ children }) {
       ? segment
       : "citizen";
   });
+
   const [account, setAccount] = useState({
     staff: "staff-demo",
     supervisor: "supervisor-a",
     worker: "worker-a",
     authority: "authority-a",
   });
+
   const [toast, setToast] = useState(null),
     [busy, setBusy] = useState(false);
+
+  // 🔌 โหลดและแมปข้อมูลพิกัด (location) ให้ครบถ้วน แผนที่จะได้ไม่พัง
+  useEffect(() => {
+    const fetchNeonToStore = async () => {
+      try {
+        const { neon } = await import('@neondatabase/serverless');
+        const sql = neon("postgresql://neondb_owner:npg_HmAiMfy2qU5N@ep-noisy-truth-b5sf63d2-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require");
+        
+        const rows = await sql`SELECT * FROM reports ORDER BY created_at DESC`;
+        
+        const neonIssues = rows.map((r) => ({
+          id: "REQ-" + r.id,
+          title: r.title || "แจ้งปัญหาทั่วไป",
+          description: r.description || "",
+          place: r.location || "ไม่ระบุสถานที่",
+          category: "ทั่วไป",
+          status: r.status || "NEW",
+          priority: "MEDIUM",
+          reportedBy: r.citizen_id || CURRENT_CITIZEN,
+          reporterName: "ประชาชน",
+          phone: "",
+          followers: [],
+          voters: [],
+          votes: 1,
+          updatedAt: r.created_at || new Date().toISOString(),
+          createdAt: r.created_at || new Date().toISOString(),
+          media: [],
+          satisfaction: [],
+          revision: 1,
+          location: USER_LOCATION || { lat: 14.0, lng: 100.0 }, // 👉 ตัวป้องกัน! ถ้าไม่มีพิกัดแผนที่จะไม่พัง
+          history: [
+            { action: "CREATE", by: r.citizen_id || CURRENT_CITIZEN, at: r.created_at || new Date().toISOString() }
+          ]
+        }));
+
+        setDB((currentDb) => {
+          const existingIds = new Set((currentDb.issues || []).map(i => i.id));
+          const uniqueNeonIssues = neonIssues.filter(i => !existingIds.has(i.id));
+          return {
+            ...currentDb,
+            issues: [...uniqueNeonIssues, ...(currentDb.issues || [])]
+          };
+        });
+      } catch (err) {
+        console.error("Failed to sync Neon reports to store:", err);
+      }
+    };
+
+    fetchNeonToStore();
+  }, []);
+
   const setCitizenIdentity = useCallback((profile) => {
     if (!profile?.userId) {
       localStorage.removeItem(CITIZEN_KEY);
@@ -151,6 +220,7 @@ export function Provider({ children }) {
     localStorage.setItem(CITIZEN_KEY, JSON.stringify(identity));
     setCitizenIdentityState(identity);
   }, []);
+
   const actor = {
     role,
     id:
@@ -160,23 +230,24 @@ export function Provider({ children }) {
           : CURRENT_CITIZEN
         : account[role],
   };
+
   const notify = useCallback(
     (message, error = false) =>
       setToast({ message, error, id: crypto.randomUUID() }),
     [],
   );
+
   useEffect(() => {
     try {
       const value = restore();
-      if (
-        !localStorage.getItem(KEY) ||
-        JSON.parse(localStorage.getItem(KEY)).demoDatasetVersion !== 4
-      )
+      if (!localStorage.getItem(KEY)) {
         localStorage.setItem(KEY, JSON.stringify(value));
+      }
       setDB(value);
     } catch {
       setLoadError("อ่านข้อมูลที่บันทึกไม่ได้ ยังไม่เขียนทับข้อมูลเดิม");
     }
+
     const sync = (ev) => {
       if (ev.key === KEY)
         try {
@@ -188,28 +259,13 @@ export function Provider({ children }) {
     window.addEventListener("storage", sync);
     return () => window.removeEventListener("storage", sync);
   }, [notify]);
-  useEffect(() => {
-    const sweep = () => {
-      const before = localStorage.getItem(KEY);
-      try {
-        const latest = restore();
-        if (localStorage.getItem(KEY) !== before) setDB(latest);
-      } catch {}
-    };
-    const timer = window.setInterval(sweep, 60_000);
-    window.addEventListener("focus", sweep);
-    document.addEventListener("visibilitychange", sweep);
-    return () => {
-      window.clearInterval(timer);
-      window.removeEventListener("focus", sweep);
-      document.removeEventListener("visibilitychange", sweep);
-    };
-  }, []);
+
   useEffect(() => {
     if (!toast) return;
     const timer = setTimeout(() => setToast(null), 4500);
     return () => clearTimeout(timer);
   }, [toast]);
+
   async function act(type, issue, payload = {}, message = "บันทึกสำเร็จ") {
     if (actionLock.current) return null;
     actionLock.current = true;
@@ -252,6 +308,7 @@ export function Provider({ children }) {
       setBusy(false);
     }
   }
+
   return (
     <Store.Provider
       value={{
@@ -274,7 +331,9 @@ export function Provider({ children }) {
     </Store.Provider>
   );
 }
+
 export const useStore = () => useContext(Store);
+
 export function useMedia(item) {
   const [url, setUrl] = useState(null);
   useEffect(() => {
