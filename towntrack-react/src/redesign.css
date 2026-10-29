@@ -1182,6 +1182,45 @@ h1, h2, h3 { color: var(--ui-ink); text-wrap: balance; }
   .role-page-citizen .active-role { max-width: 78px; font-size: 9px; }
 }
 
+@media (min-width: 761px) {
+  .role-page-citizen .citizen-menu-trigger,
+  .role-page-citizen .citizen-bottom { display: none; }
+  .role-page-citizen .citizen-nav-container {
+    display: block;
+    padding: 8px clamp(14px, 3vw, 42px) 0;
+  }
+  .role-page-citizen .citizen-sidebar {
+    position: static;
+    top: auto;
+    bottom: auto;
+    left: auto;
+    width: min(100%, 1600px);
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    overflow: visible;
+    margin: 0 auto;
+    padding: 8px;
+    border: 1px solid var(--ui-line);
+    border-radius: 15px;
+    box-shadow: none;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: none;
+    transition: none;
+  }
+  .role-page-citizen .citizen-sidebar-heading { display: none; }
+  .role-page-citizen .citizen-sidebar button {
+    width: auto;
+    min-width: max-content;
+    min-height: 46px;
+    flex: 1 1 0;
+    justify-content: center;
+    padding-inline: 12px;
+  }
+}
+
 /* Citizen satisfaction after a case is closed. */
 .tracking-rating-hint {
   display: block;
