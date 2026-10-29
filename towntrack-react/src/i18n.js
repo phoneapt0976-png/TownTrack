@@ -241,6 +241,7 @@ Object.assign(translations, {
   'เช็กเรื่องซ้ำ': 'Check for duplicates', 'ยืนยันตำแหน่ง': 'Confirm location',
   'เลือกจุดเกิดเหตุบนแผนที่ แล้วตรวจดูปัญหาใกล้เคียงในระยะ 100 เมตร': 'Choose the incident location on the map, then review nearby issues within 100 meters.',
   'พิกัดที่เลือกไว้หน้ายืนยันตำแหน่ง': 'Coordinates selected on the Confirm location page',
+  'ตำแหน่งที่เลือก': 'Selected location', 'ละติจูด': 'Latitude', 'ลองจิจูด': 'Longitude',
   'ก่อนหน้า 5 เรื่อง': 'Previous 5 issues', 'ถัดไป 5 เรื่อง': 'Next 5 issues',
   'เช่น การแจ้งความคืบหน้า หรือคุณภาพงาน': 'For example, progress updates or work quality',
   'เช่น ซอย 3 หน้าโรงเรียน': 'For example, Lane 3 near the school',

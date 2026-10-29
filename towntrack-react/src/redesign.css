@@ -394,7 +394,16 @@ h1, h2, h3 { color: var(--ui-ink); text-wrap: balance; }
 .nearby-workspace { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
 .nearby-location-panel, .nearby-results-panel { min-width: 0; }
 .nearby-location-panel .geo-map-wrap { margin-top: 12px; }
-.nearby-results-panel .section-title { margin-top: 0; }
+.nearby-results-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 10px; }
+.nearby-results-heading .section-title { min-width: 0; margin: 0; }
+.nearby-results-heading .section-title > strong { color: var(--ui-ink); font-size: 17px; }
+.nearby-results-heading .section-title > span { display: block; margin-top: 3px; }
+.nearby-results-heading > .btn { flex: 0 0 auto; justify-content: center; }
+.nearby-coordinates { display: flex; align-items: flex-start; gap: 8px; margin-top: 9px; padding: 10px 12px; border: 1px solid var(--ui-line); border-radius: 11px; color: #42677d; background: #f7fbfd; }
+.nearby-coordinates > svg { flex: 0 0 auto; margin-top: 2px; color: var(--ui-blue); }
+.nearby-coordinates > span { min-width: 0; display: grid; gap: 2px; }
+.nearby-coordinates strong { color: var(--ui-ink); font-size: 12px; }
+.nearby-coordinates small { color: var(--ui-muted); font-size: 12px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .nearby-pagination { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 14px; }
 .nearby-pagination button { min-height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 8px 12px; border: 1px solid var(--ui-line); border-radius: 10px; color: var(--ui-deep); background: #fff; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
 .nearby-pagination button:disabled { color: #91a2ae; background: #f5f8fa; cursor: not-allowed; }
@@ -886,6 +895,8 @@ h1, h2, h3 { color: var(--ui-ink); text-wrap: balance; }
   .nearby-pagination { gap: 6px; }
   .nearby-pagination button { min-width: 0; padding: 7px; font-size: 11px; }
   .nearby-pagination span { font-size: 11px; }
+  .nearby-results-heading { align-items: stretch; flex-direction: column; gap: 9px; }
+  .nearby-results-heading > .btn { width: 100%; }
 }
 
 /* Shared finishing: readable copy and consistently centered actions across roles. */

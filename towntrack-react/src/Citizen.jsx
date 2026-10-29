@@ -680,11 +680,27 @@ export default function Citizen({ navOpen, setNavOpen }) {
                       onSelect={open}
                       onPick={(p) => update("location", p)}
                     />
+                    <div className="nearby-coordinates" aria-live="polite">
+                      <MapPin size={16} aria-hidden="true" />
+                      <span>
+                        <strong>ตำแหน่งที่เลือก</strong>
+                        <small>
+                          ละติจูด {form.location.lat.toFixed(6)} · ลองจิจูด{" "}
+                          {form.location.lng.toFixed(6)}
+                        </small>
+                      </span>
+                    </div>
                   </section>
                   <section className="nearby-results-panel" aria-label="ปัญหาใกล้เคียง">
-                    <div className="section-title mt-5">
-                      <strong>พบ {near.length} ปัญหาใกล้คุณ</strong>
-                      <span className="muted text-xs">ภายใน 100 เมตร</span>
+                    <div className="nearby-results-heading">
+                      <div className="section-title mt-5">
+                        <strong>พบ {near.length} ปัญหาใกล้คุณ</strong>
+                        <span className="muted text-xs">ภายใน 100 เมตร</span>
+                      </div>
+                      <Button onClick={() => go("form")}>
+                        ไม่พบเรื่องนี้? แจ้งปัญหาใหม่
+                        <ArrowRight size={16} />
+                      </Button>
                     </div>
                     {near.length ? (
                       visibleNearby.map((i) => (
@@ -737,10 +753,6 @@ export default function Citizen({ navOpen, setNavOpen }) {
                         </button>
                       </nav>
                     )}
-                    <Button className="w-full mt-4" onClick={() => go("form")}>
-                      ไม่พบเรื่องนี้? แจ้งปัญหาใหม่
-                      <ArrowRight size={16} />
-                    </Button>
                   </section>
                 </div>
               </>
