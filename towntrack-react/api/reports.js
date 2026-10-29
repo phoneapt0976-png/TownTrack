@@ -1,8 +1,27 @@
 import { neon } from "@neondatabase/serverless";
 import { REPORT_LIMIT } from "../src/report-limit.js";
 
+let votesTableReady;
+
 function send(res, status, body) {
   res.status(status).json(body);
+}
+
+function ensureVotesTable(sql) {
+  if (!votesTableReady) {
+    votesTableReady = sql`
+      CREATE TABLE IF NOT EXISTS report_votes (
+        report_id TEXT NOT NULL,
+        voter_id TEXT NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+        PRIMARY KEY (report_id, voter_id)
+      )
+    `.catch((error) => {
+      votesTableReady = null;
+      throw error;
+    });
+  }
+  return votesTableReady;
 }
 
 export default async function reports(req, res) {
@@ -19,12 +38,21 @@ export default async function reports(req, res) {
 
   try {
     const sql = neon(process.env.DATABASE_URL);
+    await ensureVotesTable(sql);
 
     if (req.method === "GET") {
+      const citizenId = String(req.query?.citizen_id || "").slice(0, 200);
       const rows = await sql`
-        SELECT id, title, description, location, citizen_id, created_at
-        FROM reports
-        ORDER BY created_at DESC, id DESC
+        SELECT
+          r.id, r.title, r.description, r.location, r.citizen_id, r.created_at,
+          (SELECT count(*)::int FROM report_votes v WHERE v.report_id = r.id::text) AS votes,
+          EXISTS (
+            SELECT 1
+            FROM report_votes v
+            WHERE v.report_id = r.id::text AND v.voter_id = ${citizenId}
+          ) AS has_voted
+        FROM reports r
+        ORDER BY r.created_at DESC, r.id DESC
         LIMIT ${REPORT_LIMIT}
       `;
       send(res, 200, rows);
@@ -34,6 +62,44 @@ export default async function reports(req, res) {
     const input = req.body;
     if (!input || typeof input !== "object" || Array.isArray(input)) {
       send(res, 400, { error: "ข้อมูลคำร้องไม่ถูกต้อง" });
+      return;
+    }
+
+    if (input.action === "vote") {
+      const reportId = String(input.report_id || "").match(/^REQ-(\d+)$/)?.[1];
+      const voterId = String(input.citizen_id || "").trim();
+      if (!reportId || !voterId || voterId.length > 200) {
+        send(res, 400, { error: "ข้อมูลการโหวตไม่ถูกต้อง" });
+        return;
+      }
+
+      const [, inserted, [report]] = await sql.transaction([
+        sql`SELECT pg_advisory_xact_lock(740257211)`,
+        sql`
+          INSERT INTO report_votes (report_id, voter_id)
+          SELECT id::text, ${voterId}
+          FROM reports
+          WHERE id::text = ${reportId}
+          ON CONFLICT (report_id, voter_id) DO NOTHING
+          RETURNING voter_id
+        `,
+        sql`
+          SELECT
+            r.id,
+            (SELECT count(*)::int FROM report_votes v WHERE v.report_id = r.id::text) AS votes
+          FROM reports r
+          WHERE r.id::text = ${reportId}
+        `,
+      ]);
+      if (!report) {
+        send(res, 404, { error: "ไม่พบคำร้องนี้ในฐานข้อมูล" });
+        return;
+      }
+      send(res, 200, {
+        votes: report.votes,
+        voted: true,
+        alreadyVoted: inserted.length === 0,
+      });
       return;
     }
 
@@ -74,6 +140,10 @@ export default async function reports(req, res) {
           ORDER BY created_at DESC, id DESC
           OFFSET ${REPORT_LIMIT}
         )
+      `,
+      sql`
+        DELETE FROM report_votes
+        WHERE report_id NOT IN (SELECT id::text FROM reports)
       `,
     ]);
     send(res, 201, report);

@@ -178,8 +178,9 @@ function PublicMap({ issues, onOpen, mode, setMode, geo }) {
   );
 }
 export default function PublicDashboard({ onReport, onTrack, onOpen, geo }) {
-  const { db, act, busy, notify, actor } = useStore();
+  const { db, busy, notify, actor, reloadReports } = useStore();
   const [pageSize, setPageSize] = useState(getPublicIssuePageSize);
+  const [votingId, setVotingId] = useState("");
   const [query, setQuery] = useState(""),
     [category, setCategory] = useState(""),
     [status, setStatus] = useState(""),
@@ -221,6 +222,29 @@ export default function PublicDashboard({ onReport, onTrack, onOpen, geo }) {
     });
   const totalVotes = db.issues.reduce((n, i) => n + i.votes, 0),
     closed = db.issues.filter((i) => i.status === "CLOSED").length;
+  async function vote(issue) {
+    setVotingId(issue.id);
+    try {
+      const response = await fetch("/api/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "vote",
+          report_id: issue.id,
+          citizen_id: actor.id,
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "บันทึกคะแนนโหวตไม่สำเร็จ");
+      await reloadReports();
+      notify("บันทึกคะแนนโหวตแล้ว");
+    } catch (error) {
+      console.error("Could not save report vote:", error);
+      notify(error.message || "บันทึกคะแนนโหวตไม่สำเร็จ", true);
+    } finally {
+      setVotingId("");
+    }
+  }
   function exportCsv() {
     const cell = (v) => {
       const value = String(v ?? "");
@@ -505,8 +529,8 @@ export default function PublicDashboard({ onReport, onTrack, onOpen, geo }) {
                   <div className="area-case-actions">
                     <button
                       aria-label={"โหวต " + i.id}
-                      disabled={busy || voted || i.status === "CLOSED"}
-                      onClick={() => act("VOTE", i, {}, "โหวตสำเร็จ")}
+                      disabled={busy || votingId === i.id || voted || i.status === "CLOSED"}
+                      onClick={() => vote(i)}
                       className={voted ? "voted" : ""}
                     >
                       <ThumbsUp size={16} />

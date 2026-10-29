@@ -16,6 +16,7 @@ try {
 const databaseUrl = process.env.DATABASE_URL;
 const sql = databaseUrl ? neon(databaseUrl) : null;
 const production = process.argv.includes("--production");
+let votesTableReady;
 const mimeTypes = {
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",
@@ -34,6 +35,23 @@ const mimeTypes = {
 function respond(res, status, body) {
   res.writeHead(status, { "Content-Type": "application/json; charset=utf-8" });
   res.end(JSON.stringify(body));
+}
+
+function ensureVotesTable() {
+  if (!votesTableReady) {
+    votesTableReady = sql`
+      CREATE TABLE IF NOT EXISTS report_votes (
+        report_id TEXT NOT NULL,
+        voter_id TEXT NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+        PRIMARY KEY (report_id, voter_id)
+      )
+    `.catch((error) => {
+      votesTableReady = null;
+      throw error;
+    });
+  }
+  return votesTableReady;
 }
 
 async function readJson(req) {
@@ -55,11 +73,23 @@ async function handleReports(req, res) {
     return;
   }
 
+  await ensureVotesTable();
+
   if (req.method === "GET") {
+    const citizenId = new URL(req.url, "http://localhost").searchParams
+      .get("citizen_id")
+      ?.slice(0, 200) || "";
     const rows = await sql`
-      SELECT id, title, description, location, citizen_id, created_at
-      FROM reports
-      ORDER BY created_at DESC, id DESC
+      SELECT
+        r.id, r.title, r.description, r.location, r.citizen_id, r.created_at,
+        (SELECT count(*)::int FROM report_votes v WHERE v.report_id = r.id::text) AS votes,
+        EXISTS (
+          SELECT 1
+          FROM report_votes v
+          WHERE v.report_id = r.id::text AND v.voter_id = ${citizenId}
+        ) AS has_voted
+      FROM reports r
+      ORDER BY r.created_at DESC, r.id DESC
       LIMIT ${REPORT_LIMIT}
     `;
     respond(res, 200, rows);
@@ -68,6 +98,49 @@ async function handleReports(req, res) {
 
   if (req.method === "POST") {
     const input = await readJson(req);
+    if (!input || typeof input !== "object" || Array.isArray(input)) {
+      respond(res, 400, { error: "ข้อมูลคำร้องไม่ถูกต้อง" });
+      return;
+    }
+
+    if (input.action === "vote") {
+      const reportId = String(input.report_id || "").match(/^REQ-(\d+)$/)?.[1];
+      const voterId = String(input.citizen_id || "").trim();
+      if (!reportId || !voterId || voterId.length > 200) {
+        respond(res, 400, { error: "ข้อมูลการโหวตไม่ถูกต้อง" });
+        return;
+      }
+
+      const [, inserted, [report]] = await sql.transaction([
+        sql`SELECT pg_advisory_xact_lock(740257211)`,
+        sql`
+          INSERT INTO report_votes (report_id, voter_id)
+          SELECT id::text, ${voterId}
+          FROM reports
+          WHERE id::text = ${reportId}
+          ON CONFLICT (report_id, voter_id) DO NOTHING
+          RETURNING voter_id
+        `,
+        sql`
+          SELECT
+            r.id,
+            (SELECT count(*)::int FROM report_votes v WHERE v.report_id = r.id::text) AS votes
+          FROM reports r
+          WHERE r.id::text = ${reportId}
+        `,
+      ]);
+      if (!report) {
+        respond(res, 404, { error: "ไม่พบคำร้องนี้ในฐานข้อมูล" });
+        return;
+      }
+      respond(res, 200, {
+        votes: report.votes,
+        voted: true,
+        alreadyVoted: inserted.length === 0,
+      });
+      return;
+    }
+
     const title = String(input.title || "").trim();
     const description = String(input.description || "").trim();
     const location = String(input.location || "").trim();
@@ -105,6 +178,10 @@ async function handleReports(req, res) {
           ORDER BY created_at DESC, id DESC
           OFFSET ${REPORT_LIMIT}
         )
+      `,
+      sql`
+        DELETE FROM report_votes
+        WHERE report_id NOT IN (SELECT id::text FROM reports)
       `,
     ]);
     respond(res, 201, report);

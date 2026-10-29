@@ -25,8 +25,9 @@ const valid = (d) =>
     (i) => i.id && Array.isArray(i.history) && Number.isInteger(i.revision),
   );
 
-function mapReport(report) {
+function mapReport(report, actorId) {
   const at = report.created_at || new Date().toISOString();
+  const reportedBy = report.citizen_id || CURRENT_CITIZEN;
   return {
     id: `REQ-${report.id}`,
     title: report.title || "แจ้งปัญหาทั่วไป",
@@ -35,12 +36,12 @@ function mapReport(report) {
     category: "ทั่วไป",
     status: "NEW",
     priority: "normal",
-    reportedBy: report.citizen_id || CURRENT_CITIZEN,
+    reportedBy,
     reporterName: "ประชาชน",
     phone: "",
     followers: [],
-    voters: [],
-    votes: 1,
+    voters: report.has_voted ? [actorId] : [],
+    votes: Number(report.votes) || 0,
     updatedAt: at,
     createdAt: at,
     media: [],
@@ -225,18 +226,19 @@ export function Provider({ children }) {
   );
 
   const reloadReports = useCallback(async () => {
-    const response = await fetch("/api/reports");
+    const params = new URLSearchParams({ citizen_id: actor.id });
+    const response = await fetch(`/api/reports?${params}`);
     const result = await response.json();
     if (!response.ok) {
       throw new Error(result.error || "โหลดคำร้องจากฐานข้อมูลไม่สำเร็จ");
     }
-    const issues = result.map(mapReport);
+    const issues = result.map((report) => mapReport(report, actor.id));
     const updated = { ...restore(), issues };
     localStorage.setItem(KEY, JSON.stringify(updated));
     setDB(updated);
     setLoadError("");
     return issues;
-  }, []);
+  }, [actor.id]);
 
   useEffect(() => {
     let active = true;
