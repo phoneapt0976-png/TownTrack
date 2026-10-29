@@ -7,7 +7,7 @@ React + Tailwind CSS + Lucide React สำหรับสาธิตระบ�
 ใช้ Node.js ตามที่ Vite รองรับ (20.19+ หรือ 22.12+)
 
 ```sh
-npm ci
+npm --prefix ./towntrack-react ci
 npm run dev -- --port 8770
 ```
 
