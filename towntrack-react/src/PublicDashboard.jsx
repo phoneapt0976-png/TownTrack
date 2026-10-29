@@ -201,6 +201,7 @@ export default function PublicDashboard({ onReport, onTrack, onOpen, geo }) {
   const filtered = db.issues
     .filter(
       (i) =>
+        (sort !== "mine" || i.reportedBy === actor.id) &&
         (!category || i.category === category) &&
         (!status || groups.find((g) => g.id === status).test(i)) &&
         (!query ||
@@ -209,11 +210,15 @@ export default function PublicDashboard({ onReport, onTrack, onOpen, geo }) {
             .toLowerCase()
             .includes(query.toLowerCase())),
     )
-    .sort((a, b) =>
-      sort === "votes"
-        ? b.votes - a.votes
-        : new Date(b.createdAt) - new Date(a.createdAt),
-    );
+    .sort((a, b) => {
+      if (sort === "votes-desc") {
+        return b.votes - a.votes || new Date(b.createdAt) - new Date(a.createdAt);
+      }
+      if (sort === "votes-asc") {
+        return a.votes - b.votes || new Date(b.createdAt) - new Date(a.createdAt);
+      }
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
   const totalVotes = db.issues.reduce((n, i) => n + i.votes, 0),
     closed = db.issues.filter((i) => i.status === "CLOSED").length;
   function exportCsv() {
@@ -377,16 +382,19 @@ export default function PublicDashboard({ onReport, onTrack, onOpen, geo }) {
             <span>เรียงตาม</span>
             <select aria-label="เรียงรายการปัญหา" value={sort} onChange={(e) => setSort(e.target.value)}>
               <option value="latest">แจ้งล่าสุด</option>
-              <option value="votes">เสียงสนับสนุน</option>
+              <option value="votes-desc">คนโหวตเยอะสุด</option>
+              <option value="votes-asc">คนโหวตน้อยสุด</option>
+              <option value="mine">เรื่องที่เราเป็นคนแจ้ง</option>
             </select>
           </label>
-          {(category || status || query) && (
+          {(category || status || query || sort !== "latest") && (
             <button
               className="area-clear-filters"
               onClick={() => {
                 setCategory("");
                 setStatus("");
                 setQuery("");
+                setSort("latest");
               }}
             >
               ล้างตัวกรอง
@@ -455,7 +463,12 @@ export default function PublicDashboard({ onReport, onTrack, onOpen, geo }) {
               </span>
             </h2>
           </div>
-          <span className="area-sort-note"><ListFilter size={15} />{sort === "votes" ? "เรียงตามเสียงสนับสนุน" : "เรียงตามวันที่แจ้ง"}</span>
+          <span className="area-sort-note"><ListFilter size={15} />{{
+            latest: "เรียงตามวันที่แจ้ง",
+            "votes-desc": "คนโหวตเยอะสุด",
+            "votes-asc": "คนโหวตน้อยสุด",
+            mine: "เรื่องที่เราเป็นคนแจ้ง",
+          }[sort]}</span>
         </div>
         {!filtered.length && (
           <Empty
