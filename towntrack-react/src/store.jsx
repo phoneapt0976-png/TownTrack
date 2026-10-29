@@ -222,31 +222,25 @@ export function Provider({ children }) {
     setCitizenIdentityState(identity);
   }, []);
 
-  // 🟢 เริ่มต้นระบบ LINE LIFF พร้อม Alert แจ้งเตือน
+  // 🟢 เริ่มต้นระบบ LINE LIFF 
   useEffect(() => {
     const initLiff = async () => {
       try {
         await liff.init({ liffId: "2012227993-tgksP03U" });
         
-        // ถ้ายังไม่ได้ล็อกอิน ให้บังคับเด้งหน้าล็อกอิน LINE ก่อน
         if (!liff.isLoggedIn()) {
           liff.login();
         } else {
-          // ถ้าล็อกอินแล้ว ดึงข้อมูลโปรไฟล์ได้เลย
           const profile = await liff.getProfile();
           setCitizenIdentity(profile);
-          
-          // แจ้งเตือนเช็กว่าดึงชื่อได้ไหม
           alert("เชื่อมต่อ LINE สำเร็จ! ยินดีต้อนรับคุณ: " + profile.displayName); 
         }
       } catch (err) {
-        // แจ้งเตือนถ้ามี Error
         alert("เกิดข้อผิดพลาดในการดึงข้อมูล: " + err.message);
         console.error("LIFF Initialization failed", err);
       }
     };
     
-    // รันเฉพาะถ้าผู้ใช้เป็นฝั่งประชาชน
     if (role === "citizen") {
       initLiff();
     }
@@ -332,4 +326,63 @@ export function Provider({ children }) {
         try {
           await files("readwrite", (s) => saved.forEach((id) => s.delete(id)));
         } catch {}
-      notify(e.
+      notify(e.message || "บันทึกไม่สำเร็จ", true);
+      return null;
+    } finally {
+      actionLock.current = false;
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Store.Provider
+      value={{
+        db,
+        role,
+        actor,
+        citizenIdentity,
+        setCitizenIdentity,
+        account,
+        setAccount,
+        act,
+        notify,
+        busy,
+        toast,
+        loadError,
+        people: PEOPLE,
+      }}
+    >
+      {children}
+    </Store.Provider>
+  );
+}
+
+export const useStore = () => useContext(Store);
+
+export function useMedia(item) {
+  const [url, setUrl] = useState(null);
+  useEffect(() => {
+    let alive = true,
+      u;
+    const run = async () => {
+      try {
+        if (!item) return;
+        if (item?.url) {
+          if (alive) setUrl(item.url);
+          return;
+        }
+        const blob = item instanceof File ? item : await getMedia(item?.id);
+        if (!blob || !alive) return;
+        u = URL.createObjectURL(blob);
+        setUrl(u);
+      } catch {}
+    };
+    setUrl(null);
+    run();
+    return () => {
+      alive = false;
+      if (u) URL.revokeObjectURL(u);
+    };
+  }, [item]);
+  return url;
+}
