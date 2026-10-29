@@ -1,4 +1,5 @@
 import { initialize } from "../src/model.js";
+import { REPORT_LIMIT } from "../src/report-limit.js";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
@@ -9,12 +10,22 @@ if (!connectionString) {
 
 const { neon } = await import("@neondatabase/serverless");
 const sql = neon(connectionString);
-const issues = initialize(Date.now(), 50).issues;
+const issues = initialize(Date.now(), REPORT_LIMIT).issues;
+const removed = await sql`
+  DELETE FROM reports
+  WHERE id IN (
+    SELECT id
+    FROM reports
+    ORDER BY created_at DESC, id DESC
+    OFFSET ${REPORT_LIMIT}
+  )
+  RETURNING id
+`;
 const [counts] = await sql`
   SELECT count(*)::int AS total
   FROM reports
 `;
-const availableSlots = Math.max(0, 50 - counts.total);
+const availableSlots = Math.max(0, REPORT_LIMIT - counts.total);
 
 const rows = issues.map((issue) => ({
   title: `[ข้อมูลจำลอง] ${issue.title}`,
@@ -38,5 +49,5 @@ const inserted = await sql`
 `;
 
 console.log(
-  `Seed complete in reports: ${inserted.length} inserted; ${counts.total + inserted.length} of 50 slots are now used.`,
+  `Seed complete in reports: ${inserted.length} inserted, ${removed.length} older reports removed; ${counts.total + inserted.length} of ${REPORT_LIMIT} slots are now used.`,
 );
