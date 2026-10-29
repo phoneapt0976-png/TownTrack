@@ -1,5 +1,4 @@
 import { neon } from "@neondatabase/serverless";
-import { REPORT_LIMIT } from "../src/report-limit.js";
 
 let votesTableReady;
 
@@ -54,7 +53,6 @@ export default async function reports(req, res) {
           ) AS has_voted
         FROM reports r
         ORDER BY r.created_at DESC, r.id DESC
-        LIMIT ${REPORT_LIMIT}
       `;
       send(res, 200, rows);
       return;
@@ -132,19 +130,6 @@ export default async function reports(req, res) {
         INSERT INTO reports (title, description, location, citizen_id)
         VALUES (${title}, ${description}, ${location}, ${citizenId})
         RETURNING id, title, description, location, citizen_id, created_at
-      `,
-      sql`
-        DELETE FROM reports
-        WHERE id IN (
-          SELECT id
-          FROM reports
-          ORDER BY created_at DESC, id DESC
-          OFFSET ${REPORT_LIMIT}
-        )
-      `,
-      sql`
-        DELETE FROM report_votes
-        WHERE report_id NOT IN (SELECT id::text FROM reports)
       `,
     ]);
     send(res, 201, report);

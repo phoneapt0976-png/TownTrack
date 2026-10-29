@@ -4,7 +4,6 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
 import { createServer as createViteServer } from "vite";
-import { REPORT_LIMIT } from "./src/report-limit.js";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const dist = path.join(root, "dist");
@@ -91,7 +90,6 @@ async function handleReports(req, res) {
         ) AS has_voted
       FROM reports r
       ORDER BY r.created_at DESC, r.id DESC
-      LIMIT ${REPORT_LIMIT}
     `;
     respond(res, 200, rows);
     return;
@@ -170,19 +168,6 @@ async function handleReports(req, res) {
         INSERT INTO reports (title, description, location, citizen_id)
         VALUES (${title}, ${description}, ${location}, ${citizenId})
         RETURNING id, title, description, location, citizen_id, created_at
-      `,
-      sql`
-        DELETE FROM reports
-        WHERE id IN (
-          SELECT id
-          FROM reports
-          ORDER BY created_at DESC, id DESC
-          OFFSET ${REPORT_LIMIT}
-        )
-      `,
-      sql`
-        DELETE FROM report_votes
-        WHERE report_id NOT IN (SELECT id::text FROM reports)
       `,
     ]);
     respond(res, 201, report);
