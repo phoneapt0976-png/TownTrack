@@ -1,8 +1,9 @@
 /* Public service information and shared accessible controls. */
-.tracking-status-filters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 16px 0 10px; }
-.tracking-status-filters button { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 48px; padding: 10px 12px; border: 1px solid #cadde9; border-radius: 12px; background: #fff; color: #294f65; text-align: left; cursor: pointer; }
+.tracking-status-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: 8px; margin: 16px 0 10px; }
+.tracking-status-filters button { display: flex; align-items: center; gap: 8px; min-width: 0; min-height: 48px; padding: 10px 12px; border: 1px solid #cadde9; border-radius: 12px; background: #fff; color: #294f65; text-align: left; cursor: pointer; }
+.tracking-status-filters button span { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
 .tracking-status-filters button[aria-pressed='true'] { background: #e5f3fc; border-color: #267ba7; color: #124c70; box-shadow: inset 0 0 0 1px #267ba7; }
-.tracking-status-filters strong { border-radius: 8px; background: #eef5f9; padding: 2px 7px; font-variant-numeric: tabular-nums; }
+.tracking-status-filters strong { flex: 0 0 auto; border-radius: 8px; background: #eef5f9; padding: 2px 7px; font-variant-numeric: tabular-nums; }
 .tracking-status-help { margin: 0 0 16px; font-size: 14px; line-height: 1.65; color: #466477; }
 .citizen-body .tracking-card.tracking-card-closed { border-color: #99c9bd; border-left: 4px solid #328775; }
 @media (max-width: 760px) { .tracking-status-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
