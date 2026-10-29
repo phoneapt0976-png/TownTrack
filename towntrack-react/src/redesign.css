@@ -530,9 +530,24 @@ h1, h2, h3 { color: var(--ui-ink); text-wrap: balance; }
 .citizen-portal-shell .public-heading h1 { font-size: clamp(27px, 3vw, 38px); }
 .citizen-portal-shell .public-metrics { gap: 10px; padding: 0; border: 0; }
 .citizen-portal-shell .public-metrics > div { padding: 18px 20px; border: 1px solid var(--ui-line); border-radius: 15px; background: #fff; }
-.citizen-portal-shell .public-section-heading { margin-top: 27px; }
-.citizen-portal-shell .featured-cases { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); overflow: visible; }
-.citizen-portal-shell .featured-case { min-width: 0; width: 100%; min-height: 116px; border-radius: 14px; }
+.citizen-portal-shell .public-section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-top: 27px; }
+.citizen-portal-shell .public-section-heading h2 { margin: 0; color: var(--ui-ink); font-size: clamp(18px, 1.8vw, 23px); line-height: 1.4; }
+.citizen-portal-shell .public-section-heading > span { display: inline-flex; align-items: center; gap: 6px; color: var(--ui-muted); font-size: 13px; white-space: nowrap; }
+.citizen-portal-shell .featured-cases { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; overflow: visible; margin-top: 13px; }
+.citizen-portal-shell .featured-case { min-width: 0; width: 100%; min-height: 108px; display: grid; grid-template-columns: 58px minmax(0, 1fr); align-items: center; gap: 11px; padding: 11px; border: 1px solid var(--ui-line); border-radius: 14px; color: var(--ui-ink); background: #fff; box-shadow: 0 5px 16px #1b455d08; text-align: left; cursor: pointer; transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease; }
+.citizen-portal-shell .featured-case:hover { transform: translateY(-2px); border-color: #9dc9dc; box-shadow: 0 9px 22px #1b455d12; }
+.citizen-portal-shell .featured-case:focus-visible { outline: 3px solid #67b3d8; outline-offset: 2px; }
+.citizen-portal-shell .featured-case .case-art, .citizen-portal-shell .featured-case .case-photo { position: relative; width: 58px; height: 66px; min-width: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 11px; background: linear-gradient(145deg, #eaf6fb, #d9edf6); color: #3786aa; }
+.citizen-portal-shell .featured-case .case-art > svg { position: relative; z-index: 1; width: 25px; height: 25px; }
+.citizen-portal-shell .featured-case .case-art > small { position: absolute; right: 3px; bottom: 3px; left: 3px; overflow: hidden; color: #53798d; font-size: 8px; line-height: 1.2; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+.citizen-portal-shell .featured-case .art-orbit { position: absolute; width: 45px; height: 45px; border: 1px solid #9dcde0; border-radius: 50%; }
+.citizen-portal-shell .featured-case .case-photo img, .citizen-portal-shell .featured-case .case-photo video { width: 100%; height: 100%; display: block; object-fit: cover; }
+.citizen-portal-shell .featured-case .case-photo > span { position: absolute; right: 3px; bottom: 3px; left: 3px; overflow: hidden; padding: 2px 3px; border-radius: 5px; color: #31586d; background: #ffffffeb; font-size: 8px; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+.citizen-portal-shell .featured-copy { min-width: 0; display: grid; justify-items: start; gap: 5px; }
+.citizen-portal-shell .featured-rank { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 5px; color: #547387; font-size: 11px; font-weight: 750; line-height: 1.3; }
+.citizen-portal-shell .rank-votes { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 3px; padding: 3px 6px; border-radius: 999px; color: #176f98; background: #edf7fb; font-size: 10px; font-variant-numeric: tabular-nums; }
+.citizen-portal-shell .featured-case .featured-copy > strong { min-width: 0; display: -webkit-box; overflow: hidden; color: #193f58; font-size: 13px; font-weight: 750; line-height: 1.4; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.citizen-portal-shell .featured-case .badge { max-width: 100%; overflow: hidden; padding: 3px 7px; font-size: 10px; text-overflow: ellipsis; }
 .citizen-portal-shell .area-explorer { overflow: hidden; margin: 28px 0 22px; border: 1px solid #d8e7ef; border-radius: 24px; background: #fff; box-shadow: 0 16px 38px #163c550b; }
 .area-explorer-head { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 24px; overflow: hidden; padding: clamp(22px, 3vw, 34px); border-bottom: 1px solid #e3eef3; background: linear-gradient(112deg, #edf7fb 0%, #f8fcfe 58%, #fff 100%); }
 .area-explorer-head::after { position: absolute; right: 20%; top: -105px; width: 240px; height: 240px; border: 1px solid #d4eaf4; border-radius: 50%; box-shadow: 0 0 0 24px #e5f2f800, 0 0 0 25px #d4eaf477, 0 0 0 54px #e5f2f800, 0 0 0 55px #d4eaf444; content: ""; pointer-events: none; }
@@ -797,6 +812,7 @@ h1, h2, h3 { color: var(--ui-ink); text-wrap: balance; }
   .citizen-portal-shell .public-metrics strong { font-size: 22px; }
   .citizen-portal-shell .public-section-heading { margin-top: 19px; }
   .citizen-portal-shell .public-section-heading h2 { font-size: 15px; }
+  .citizen-portal-shell .public-section-heading { align-items: flex-start; flex-direction: column; gap: 4px; }
   .citizen-portal-shell .featured-cases { grid-template-columns: 1fr; gap: 8px; }
   .citizen-portal-shell .featured-case { min-height: 94px; }
   .citizen-portal-shell .area-explorer { margin: 18px 0; border-radius: 17px; }
