@@ -21,7 +21,7 @@ npm run dev -- --port 8770
 - `/worker` — ผู้ลงพื้นที่
 - `/authority` — ผู้มีอำนาจ / ผู้บริหาร
 
-แต่ละ URL เป็นพื้นที่ทำงานแยกกัน ไม่มีแถบสลับบทบาทด้านบน หน้าเว็บโหลดคำร้องทั้งหมดที่มีใน Neon และรีเฟรชอัตโนมัติทุก 15 วินาที รวมถึงเมื่อกลับมาเปิดแท็บ คำร้องใหม่และคะแนนโหวตบันทึกกลับไปยัง Neon ส่วนบัญชีทดลองทีม A/B เลือกได้จากหน้า desktop ของบทบาทที่เกี่ยวข้อง
+แต่ละ URL เป็นพื้นที่ทำงานแยกกัน ไม่มีแถบสลับบทบาทด้านบน หน้าเว็บโหลดคำร้องทั้งหมดที่มีใน Neon และรีเฟรชอัตโนมัติทุก 15 วินาที รวมถึงเมื่อกลับมาเปิดแท็บ คำร้องใหม่และคะแนนโหวตบันทึกกลับไปยัง Neon ผู้ใช้เลือกตำแหน่งบนแผนที่ในหน้าตรวจเรื่องซ้ำก่อนกรอกคำร้อง ส่วนหน้ากรอกคำร้องมีเฉพาะข้อมูลและใช้พิกัดที่เลือกไว้ ส่วนบัญชีทดลองทีม A/B เลือกได้จากหน้า desktop ของบทบาทที่เกี่ยวข้อง
 
 ```sh
 npm test
@@ -41,7 +41,7 @@ npm run db:seed:demo
 
 สคริปต์เพิ่มข้อมูลสาธิตลงตาราง `reports` โดยใช้คอลัมน์ `title`, `description`, `location` และ `citizen_id` โดยไม่ลบหรือจำกัดจำนวนรายการ หัวข้อข้อมูลสาธิตจะขึ้นต้น `[ข้อมูลจำลอง]` และ `citizen_id` จะขึ้นต้น `towntrack-mock:` เพื่อแยกจากคำร้องจริง การรันซ้ำจะข้ามรายการเดิม
 
-ตั้งค่า `DATABASE_URL` ใน `.env.local` ก่อนเริ่มเว็บด้วย `npm run dev` หรือรัน production build ด้วย `npm run build` แล้วเปิดเซิร์ฟเวอร์ด้วย `npm start` (หรือ `npm run preview`) API ใช้ตาราง `reports` ที่มีคอลัมน์ `id`, `title`, `description`, `location`, `citizen_id` และ `created_at` หากนำไป deploy ต้อง deploy Node server นี้พร้อมกำหนด `DATABASE_URL` ใน environment ของ server
+ตั้งค่า `DATABASE_URL` ใน `.env.local` ก่อนเริ่มเว็บด้วย `npm run dev` หรือรัน production build ด้วย `npm run build` แล้วเปิดเซิร์ฟเวอร์ด้วย `npm start` (หรือ `npm run preview`) API ใช้ตาราง `reports` ที่มีคอลัมน์ `id`, `title`, `description`, `location`, `latitude`, `longitude`, `citizen_id` และ `created_at`; API จะเพิ่มคอลัมน์พิกัดให้ตารางเดิมโดยอัตโนมัติ หากนำไป deploy ต้อง deploy Node server นี้พร้อมกำหนด `DATABASE_URL` ใน environment ของ server
 
 ### Deploy บน Vercel
 

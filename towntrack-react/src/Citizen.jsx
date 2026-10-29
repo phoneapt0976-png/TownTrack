@@ -489,6 +489,8 @@ export default function Citizen({ navOpen, setNavOpen }) {
           title: form.title || form.category,
           description: form.description,
           location: form.place,
+          latitude: form.location.lat,
+          longitude: form.location.lng,
           citizen_id: actor.id,
         }),
       });
@@ -752,7 +754,11 @@ export default function Citizen({ navOpen, setNavOpen }) {
                       placeholder="เช่น ไฟส่องสว่างดับท้ายซอย"
                     />
                   </Field>
-                  <Field label="สถานที่เกิดเหตุ" required>
+                  <Field
+                    label="สถานที่เกิดเหตุ"
+                    hint={`พิกัดที่เลือกไว้หน้าเช็กเรื่องซ้ำ: ${form.location.lat.toFixed(6)}, ${form.location.lng.toFixed(6)} · หากต้องการเปลี่ยนตำแหน่ง ให้ย้อนกลับไปเลือกบนแผนที่`}
+                    required
+                  >
                     <input
                       value={form.place}
                       required
@@ -761,57 +767,6 @@ export default function Citizen({ navOpen, setNavOpen }) {
                       placeholder="เช่น ซอย 3 หน้าโรงเรียน"
                     />
                   </Field>
-                  <GeoMap
-                    center={form.location}
-                    onPick={(p) => update("location", p)}
-                    radar
-                  />
-                  <div className="form-grid">
-                    <Field label="ละติจูด">
-                      <input
-                        type="number"
-                        step="any"
-                        min="-90"
-                        max="90"
-                        value={form.location.lat}
-                        onChange={(e) =>
-                          update("location", {
-                            ...form.location,
-                            lat: Number(e.target.value),
-                          })
-                        }
-                      />
-                    </Field>
-                    <Field label="ลองจิจูด">
-                      <input
-                        type="number"
-                        step="any"
-                        min="-180"
-                        max="180"
-                        value={form.location.lng}
-                        onChange={(e) =>
-                          update("location", {
-                            ...form.location,
-                            lng: Number(e.target.value),
-                          })
-                        }
-                      />
-                    </Field>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    disabled={geo.pending}
-                    onClick={locate}
-                  >
-                    <LocateFixed size={15} />
-                    {geo.pending ? "กำลังหาตำแหน่ง…" : "ใช้ GPS ของฉัน"}
-                  </Button>
-                  {geo.error && (
-                    <p className="gps-error" role="alert">
-                      {geo.error}
-                    </p>
-                  )}
                   <Field label="ชื่อ–นามสกุล" hint="ไม่บังคับ">
                     <input
                       value={form.reporterName}

@@ -1,6 +1,7 @@
 import { neon } from "@neondatabase/serverless";
 
 let votesTableReady;
+let reportLocationColumnsReady;
 
 function send(res, status, body) {
   res.status(status).json(body);
@@ -23,6 +24,20 @@ function ensureVotesTable(sql) {
   return votesTableReady;
 }
 
+function ensureReportLocationColumns(sql) {
+  if (!reportLocationColumnsReady) {
+    reportLocationColumnsReady = sql`
+      ALTER TABLE reports
+        ADD COLUMN IF NOT EXISTS latitude DOUBLE PRECISION,
+        ADD COLUMN IF NOT EXISTS longitude DOUBLE PRECISION
+    `.catch((error) => {
+      reportLocationColumnsReady = null;
+      throw error;
+    });
+  }
+  return reportLocationColumnsReady;
+}
+
 export default async function reports(req, res) {
   if (!["GET", "POST"].includes(req.method)) {
     res.setHeader("Allow", "GET, POST");
@@ -38,13 +53,15 @@ export default async function reports(req, res) {
   try {
     const sql = neon(process.env.DATABASE_URL);
     await ensureVotesTable(sql);
+    await ensureReportLocationColumns(sql);
 
     if (req.method === "GET") {
       res.setHeader("Cache-Control", "no-store, max-age=0");
       const citizenId = String(req.query?.citizen_id || "").slice(0, 200);
       const rows = await sql`
         SELECT
-          r.id, r.title, r.description, r.location, r.citizen_id, r.created_at,
+          r.id, r.title, r.description, r.location, r.latitude, r.longitude,
+          r.citizen_id, r.created_at,
           (SELECT count(*)::int FROM report_votes v WHERE v.report_id = r.id::text) AS votes,
           EXISTS (
             SELECT 1
@@ -106,6 +123,13 @@ export default async function reports(req, res) {
     const description = String(input.description || "").trim();
     const location = String(input.location || "").trim();
     const citizenId = String(input.citizen_id || "").trim();
+    const hasAnyCoordinates =
+      input.latitude !== undefined || input.longitude !== undefined;
+    const hasCoordinates =
+      input.latitude !== undefined && input.latitude !== null &&
+      input.longitude !== undefined && input.longitude !== null;
+    const latitude = hasCoordinates ? Number(input.latitude) : null;
+    const longitude = hasCoordinates ? Number(input.longitude) : null;
 
     if (!title || title.length > 180) {
       send(res, 400, { error: "หัวข้อคำร้องต้องมีความยาว 1–180 ตัวอักษร" });
@@ -123,13 +147,26 @@ export default async function reports(req, res) {
       send(res, 400, { error: "ไม่พบข้อมูลผู้แจ้งที่ถูกต้อง" });
       return;
     }
+    if (
+      hasAnyCoordinates &&
+      (!hasCoordinates ||
+        !Number.isFinite(latitude) ||
+        !Number.isFinite(longitude) ||
+        latitude < -90 ||
+        latitude > 90 ||
+        longitude < -180 ||
+        longitude > 180)
+    ) {
+      send(res, 400, { error: "พิกัดตำแหน่งไม่ถูกต้อง" });
+      return;
+    }
 
     const [, [report]] = await sql.transaction([
       sql`SELECT pg_advisory_xact_lock(740257211)`,
       sql`
-        INSERT INTO reports (title, description, location, citizen_id)
-        VALUES (${title}, ${description}, ${location}, ${citizenId})
-        RETURNING id, title, description, location, citizen_id, created_at
+        INSERT INTO reports (title, description, location, latitude, longitude, citizen_id)
+        VALUES (${title}, ${description}, ${location}, ${latitude}, ${longitude}, ${citizenId})
+        RETURNING id, title, description, location, latitude, longitude, citizen_id, created_at
       `,
     ]);
     send(res, 201, report);

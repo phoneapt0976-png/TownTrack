@@ -48,7 +48,15 @@ function mapReport(report, actorId) {
     media: [],
     satisfaction: [],
     revision: 1,
-    location: USER_LOCATION,
+    location:
+      report.latitude !== null &&
+      report.latitude !== undefined &&
+      report.longitude !== null &&
+      report.longitude !== undefined &&
+      Number.isFinite(Number(report.latitude)) &&
+      Number.isFinite(Number(report.longitude))
+        ? { lat: Number(report.latitude), lng: Number(report.longitude) }
+        : USER_LOCATION,
     history: [
       {
         id: `report-${report.id}`,
