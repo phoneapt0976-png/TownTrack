@@ -39,13 +39,12 @@ const { chromium } = require("@playwright/test");
   await p
     .locator("input[type=file]")
     .setInputFiles({
-      name: "too-large.mp4",
+      name: "within-limit.mp4",
       mimeType: "video/mp4",
-      buffer: Buffer.alloc(10 * 1024 * 1024),
+      buffer: Buffer.from([0]),
     });
-  await p.getByRole("alert").filter({ hasText: "น้อยกว่า 10 MB" }).waitFor();
-  if (await p.locator(".upload-previews").count())
-    throw Error("oversized file admitted");
+  await p.getByText("within-limit.mp4").waitFor();
+  await p.getByRole("button", { name: "ลบ within-limit.mp4" }).click();
   await p
     .getByRole("button", { name: "ผู้มีอำนาจ / ผู้บริหาร", exact: true })
     .click();
@@ -53,7 +52,7 @@ const { chromium } = require("@playwright/test");
   if (await p.locator(".queue-item").count())
     throw Error("foreign authority pending");
   console.log(
-    "PASS cross-tab live sync, fire popup waits for successful report, 10 MB rejected, authority isolation",
+    "PASS cross-tab live sync, fire popup waits for successful report, files within the 1 GB limit are accepted, authority isolation",
   );
   await b.close();
 })().catch((e) => {

@@ -12,6 +12,7 @@ import {
   CURRENT_CITIZEN,
   expireIncompleteCases,
   USER_LOCATION,
+  MAX_MEDIA_FILE_BYTES,
 } from "./model";
 
 const KEY = "towntrack-react-v4";
@@ -141,8 +142,8 @@ export function validateFiles(list) {
   for (const f of list) {
     if (!allowed.includes(f.type))
       throw Error("รองรับ JPG, PNG, WebP, MP4, WebM และ MOV");
-    if (!f.size || f.size >= 10 * 1024 * 1024)
-      throw Error("แต่ละไฟล์ต้องมีขนาดน้อยกว่า 10 MB");
+    if (!f.size || f.size > MAX_MEDIA_FILE_BYTES)
+      throw Error("แต่ละไฟล์ต้องมีขนาดไม่เกิน 1 GB");
   }
 }
 

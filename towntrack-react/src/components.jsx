@@ -250,7 +250,7 @@ export function Uploader({
           {label}
           {required ? " *" : ""}
         </strong>
-        <span>JPG, PNG, WebP, MP4, WebM, MOV · น้อยกว่า 10 MB/ไฟล์</span>
+        <span>JPG, PNG, WebP, MP4, WebM, MOV · ไม่เกิน 1 GB/ไฟล์</span>
         <input
           id={id}
           type="file"

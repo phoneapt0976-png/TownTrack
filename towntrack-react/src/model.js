@@ -4,6 +4,7 @@ export const CURRENT_CITIZEN = "citizen-demo";
 export const CITIZEN_EDIT_WINDOW_DAYS = 7;
 export const MUNICIPALITY = "เทศบาลตำบลระแหง";
 export const MUNICIPAL_PHONE = "02-599-1543";
+export const MAX_MEDIA_FILE_BYTES = 1024 ** 3;
 export const STATUS = {
   NEW: "รอดำเนินการ",
   RECEIVED: "รับคำร้องแล้ว",
@@ -288,11 +289,12 @@ function validMedia(list = []) {
           "video/webm",
           "video/quicktime",
         ].includes(m.type) ||
+        !Number.isSafeInteger(m.size) ||
         m.size <= 0 ||
-        m.size >= 10 * 1024 * 1024,
+        m.size > MAX_MEDIA_FILE_BYTES,
     )
   )
-    throw Error("ไฟล์แนบไม่ถูกต้อง ต้องน้อยกว่า 10 MB สูงสุด 5 ไฟล์");
+    throw Error("ไฟล์แนบไม่ถูกต้อง ขนาดไม่เกิน 1 GB ต่อไฟล์ สูงสุด 5 ไฟล์");
 }
 export function transition(db, cmd, actor, now = new Date().toISOString()) {
   if (!authorizedPerson(actor)) throw Error("ไม่มีสิทธิ์ดำเนินการ");

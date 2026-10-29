@@ -392,7 +392,7 @@ Object.assign(translations, {
   'เทศบาล': 'Municipality', 'รับเรื่องตัวอย่างในระบบ': 'Sample report received in system',
   'ระบบ': 'System', 'กลับไปดูปัญหาใกล้ตัว': 'Back to nearby issues',
   'คำร้องใหม่': 'New report', '(จำเป็น)': '(required)',
-  'JPG, PNG, WebP, MP4, WebM, MOV · น้อยกว่า 10 MB/ไฟล์': 'JPG, PNG, WebP, MP4, WebM, MOV · under 10 MB per file',
+  'JPG, PNG, WebP, MP4, WebM, MOV · ไม่เกิน 1 GB/ไฟล์': 'JPG, PNG, WebP, MP4, WebM, MOV · up to 1 GB per file',
   'ทุกเรื่องมีความคืบหน้า': 'Follow every issue',
   'เรื่องที่ฉันแจ้งเอง': 'Issues I reported',
   'เหตุด่วนเหตุร้าย': 'Emergency assistance', 'ตำรวจ · ทั่วประเทศ': 'Police · nationwide',

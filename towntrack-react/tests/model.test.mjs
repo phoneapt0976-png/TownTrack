@@ -8,6 +8,7 @@ import {
   USER_LOCATION,
   roleIssues,
   publicIssue,
+  MAX_MEDIA_FILE_BYTES,
 } from "../src/model.js";
 const actors = {
   citizen: { role: "citizen", id: CURRENT_CITIZEN },
@@ -195,11 +196,17 @@ test("create validates input and rejects retired fire reports", () => {
     h.run("CREATE", null, "citizen", { ...p, description: " " }),
   );
   assert.throws(() => h.run("CREATE", null, "citizen", { ...p, phone: "123" }));
+  const maxSizeFile = h.run("CREATE", null, "citizen", {
+    ...p,
+    media: [{ ...proof, size: MAX_MEDIA_FILE_BYTES }],
+  });
+  assert.equal(maxSizeFile.media[0].size, MAX_MEDIA_FILE_BYTES);
   assert.throws(() =>
     h.run("CREATE", null, "citizen", {
       ...p,
-      media: [{ ...proof, size: 10 * 1024 * 1024 }],
+      media: [{ ...proof, size: MAX_MEDIA_FILE_BYTES + 1 }],
     }),
+    /ไม่เกิน 1 GB/,
   );
   assert.throws(()=>h.run("CREATE",null,"citizen",{...p,media:[]}), /แนบรูปหลักฐาน/);
   const optional=h.run("CREATE",null,"citizen",{...p,phone:""});
@@ -230,4 +237,3 @@ test("V4 retires fire records without losing user data or reusing IDs", async ()
   const created = transition(updated, { type: "CREATE", payload: { category: "ถนนชำรุด", description: "ถนนชำรุด", place: "ชุมชน", location: USER_LOCATION, media: [proof] } }, actors.citizen);
   assert(Number(created.db.issues.at(-1).id.split("-")[1]) > 900);
 });
-
