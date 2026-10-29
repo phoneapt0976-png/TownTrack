@@ -34,7 +34,7 @@ function mapReport(report, actorId) {
     title: report.title || "แจ้งปัญหาทั่วไป",
     description: report.description || "",
     place: report.location || "ไม่ระบุสถานที่",
-    category: "ทั่วไป",
+    category: report.category || "ทั่วไป",
     status: "NEW",
     priority: "normal",
     reportedBy,

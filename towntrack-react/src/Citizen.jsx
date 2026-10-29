@@ -25,6 +25,7 @@ import {
   Waves,
   Zap,
   Trees,
+  Ellipsis,
 } from "lucide-react";
 import { useStore } from "./store";
 import { getLanguage } from "./i18n";
@@ -62,6 +63,7 @@ const CATEGORY_OPTIONS = [
   { value: "ขยะมูลฝอย", label: "ขยะ / สิ่งสกปรก", Icon: Trash2 },
   { value: "ไฟฟ้าส่องสว่าง", label: "ไฟดับ / ไฟส่องทาง", Icon: Zap },
   { value: "กิ่งไม้/ความปลอดภัย", label: "ต้นไม้ล้ม / กิ่งไม้", Icon: Trees },
+  { value: "อื่นๆ", label: "อื่นๆ", Icon: Ellipsis },
 ];
 
 function VoteFollow({ issue, compact = false }) {
@@ -487,6 +489,7 @@ export default function Citizen({ navOpen, setNavOpen }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: form.title || form.category,
+          category: form.category,
           description: form.description,
           location: form.place,
           latitude: form.location.lat,

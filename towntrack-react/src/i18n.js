@@ -123,6 +123,7 @@ Object.assign(translations, {
   'ถนนพัง / ฝาท่อ': 'Road / manhole', 'น้ำขัง / น้ำท่วม': 'Flooding / standing water',
   'ขยะ / สิ่งสกปรก': 'Waste / litter', 'ไฟดับ / ไฟส่องทาง': 'Power / street lighting',
   'ต้นไม้ล้ม / กิ่งไม้': 'Fallen tree / branches',
+  'อื่นๆ': 'Other',
   'ทุกปัญหา มีความคืบหน้า': 'Every issue can move forward',
   '5 ปัญหาที่ชุมชนสนใจมากที่สุด': 'Top 5 most-voted community issues',
   'สำรวจปัญหาในพื้นที่': 'Explore local issues', 'ความคืบหน้าเรื่อง': 'Issue progress',

@@ -32,6 +32,7 @@ export const CATEGORIES = [
   "ขยะมูลฝอย",
   "ท่อระบายน้ำ",
   "กิ่งไม้/ความปลอดภัย",
+  "อื่นๆ",
 ];
 export const PEOPLE = {
   staff: [{ id: "staff-demo", name: "เจ้าหน้าที่รับเรื่อง" }],

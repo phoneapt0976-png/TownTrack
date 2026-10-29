@@ -59,7 +59,8 @@ function ensureReportLocationColumns() {
     reportLocationColumnsReady = sql`
       ALTER TABLE reports
         ADD COLUMN IF NOT EXISTS latitude DOUBLE PRECISION,
-        ADD COLUMN IF NOT EXISTS longitude DOUBLE PRECISION
+        ADD COLUMN IF NOT EXISTS longitude DOUBLE PRECISION,
+        ADD COLUMN IF NOT EXISTS category TEXT NOT NULL DEFAULT 'ทั่วไป'
     `.catch((error) => {
       reportLocationColumnsReady = null;
       throw error;
@@ -97,7 +98,7 @@ async function handleReports(req, res) {
       ?.slice(0, 200) || "";
     const rows = await sql`
       SELECT
-        r.id, r.title, r.description, r.location, r.latitude, r.longitude,
+        r.id, r.title, r.category, r.description, r.location, r.latitude, r.longitude,
         r.citizen_id, r.created_at,
         (SELECT count(*)::int FROM report_votes v WHERE v.report_id = r.id::text) AS votes,
         EXISTS (
@@ -158,6 +159,7 @@ async function handleReports(req, res) {
     }
 
     const title = String(input.title || "").trim();
+    const category = String(input.category || "ทั่วไป").trim();
     const description = String(input.description || "").trim();
     const location = String(input.location || "").trim();
     const citizenId = String(input.citizen_id || "").trim();
@@ -171,6 +173,10 @@ async function handleReports(req, res) {
 
     if (!title || title.length > 180) {
       respond(res, 400, { error: "หัวข้อคำร้องต้องมีความยาว 1–180 ตัวอักษร" });
+      return;
+    }
+    if (!category || category.length > 100) {
+      respond(res, 400, { error: "ประเภทปัญหาไม่ถูกต้อง" });
       return;
     }
     if (!description || description.length > 5000) {
@@ -202,9 +208,9 @@ async function handleReports(req, res) {
     const [, [report]] = await sql.transaction([
       sql`SELECT pg_advisory_xact_lock(740257211)`,
       sql`
-        INSERT INTO reports (title, description, location, latitude, longitude, citizen_id)
-        VALUES (${title}, ${description}, ${location}, ${latitude}, ${longitude}, ${citizenId})
-        RETURNING id, title, description, location, latitude, longitude, citizen_id, created_at
+        INSERT INTO reports (title, category, description, location, latitude, longitude, citizen_id)
+        VALUES (${title}, ${category}, ${description}, ${location}, ${latitude}, ${longitude}, ${citizenId})
+        RETURNING id, title, category, description, location, latitude, longitude, citizen_id, created_at
       `,
     ]);
     respond(res, 201, report);
