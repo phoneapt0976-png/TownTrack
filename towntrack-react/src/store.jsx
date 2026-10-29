@@ -228,15 +228,15 @@ export function Provider({ children }) {
       try {
         await liff.init({ liffId: "2012227993-tgksP03U" });
         
+        // ถ้ายังไม่ได้ล็อกอิน ให้บังคับเด้งหน้าล็อกอิน LINE ก่อน
         if (!liff.isLoggedIn()) {
           liff.login();
         } else {
+          // ถ้าล็อกอินแล้ว ดึงข้อมูลได้เลย
           const profile = await liff.getProfile();
           setCitizenIdentity(profile);
-          alert("เชื่อมต่อ LINE สำเร็จ! ยินดีต้อนรับคุณ: " + profile.displayName); 
         }
       } catch (err) {
-        alert("เกิดข้อผิดพลาดในการดึงข้อมูล: " + err.message);
         console.error("LIFF Initialization failed", err);
       }
     };
