@@ -6,12 +6,14 @@ import React, {
   useCallback,
   useRef,
 } from "react";
+// 🟢 นำเข้าแพ็กเกจ LINE LIFF
+import liff from "@line/liff"; 
 import {
   transition,
   PEOPLE,
   CURRENT_CITIZEN,
   expireIncompleteCases,
-  USER_LOCATION, // 👉 เพิ่มการเรียกใช้พิกัดแผนที่เริ่มต้น ป้องกันแอปพัง
+  USER_LOCATION,
 } from "./model";
 
 const KEY = "towntrack-react-v4";
@@ -157,7 +159,6 @@ export function Provider({ children }) {
   const [toast, setToast] = useState(null),
     [busy, setBusy] = useState(false);
 
-  // 🔌 โหลดและแมปข้อมูลพิกัด (location) ให้ครบถ้วน แผนที่จะได้ไม่พัง
   useEffect(() => {
     const fetchNeonToStore = async () => {
       try {
@@ -185,7 +186,7 @@ export function Provider({ children }) {
           media: [],
           satisfaction: [],
           revision: 1,
-          location: USER_LOCATION || { lat: 14.0, lng: 100.0 }, // 👉 ตัวป้องกัน! ถ้าไม่มีพิกัดแผนที่จะไม่พัง
+          location: USER_LOCATION || { lat: 14.0, lng: 100.0 }, 
           history: [
             { action: "CREATE", by: r.citizen_id || CURRENT_CITIZEN, at: r.created_at || new Date().toISOString() }
           ]
@@ -220,6 +221,29 @@ export function Provider({ children }) {
     localStorage.setItem(CITIZEN_KEY, JSON.stringify(identity));
     setCitizenIdentityState(identity);
   }, []);
+
+  // 🟢 เริ่มต้นระบบ LINE LIFF 
+  useEffect(() => {
+    const initLiff = async () => {
+      try {
+        // 👉 เปลี่ยน "YOUR_LIFF_ID" เป็น LIFF ID ที่ได้จากเว็บ LINE Developers
+        await liff.init({ liffId: "2012227993-tgksP03U" });
+        
+        // ตรวจสอบว่าผู้ใช้เปิดผ่าน LINE (และล็อกอินอยู่) หรือไม่
+        if (liff.isLoggedIn()) {
+          const profile = await liff.getProfile();
+          setCitizenIdentity(profile); // บันทึกชื่อและรูปเข้าสู่ระบบของเรา
+        }
+      } catch (err) {
+        console.error("LIFF Initialization failed", err);
+      }
+    };
+    
+    // รันเฉพาะถ้าผู้ใช้เป็นฝั่งประชาชน
+    if (role === "citizen") {
+      initLiff();
+    }
+  }, [role, setCitizenIdentity]);
 
   const actor = {
     role,
