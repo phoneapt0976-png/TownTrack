@@ -378,7 +378,7 @@ function CitizenNav({ page, go, open, setOpen }) {
 }
 
 export default function Citizen({ navOpen, setNavOpen }) {
-  const { db, act, busy, notify, actor, citizenIdentity } = useStore();
+  const { db, act, busy, notify, actor, citizenIdentity, reloadReports } = useStore();
   const geo = useGeolocation();
   const locate = async () => {
     const position = await geo.request();
@@ -482,29 +482,40 @@ export default function Citizen({ navOpen, setNavOpen }) {
     }
 
     try {
-      const { neon } = await import('@neondatabase/serverless');
-      const sql = neon("postgresql://neondb_owner:npg_HmAiMfy2qU5N@ep-noisy-truth-b5sf63d2-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require");
+      const response = await fetch("/api/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: form.title || form.category,
+          description: form.description,
+          location: form.place,
+          citizen_id: actor.id,
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Could not save the report.");
 
-      await sql`
-        INSERT INTO reports (title, description, location, citizen_id)
-        VALUES (
-          ${form.title || form.category}, 
-          ${form.description}, 
-          ${form.place}, 
-          ${actor.id}
-        )
-      `;
-
-      notify("ส่งคำร้องสำเร็จ ข้อมูลบันทึกลง Neon เรียบร้อย!");
-      const fakeId = "REQ-" + Math.floor(1000 + Math.random() * 9000);
-      setReceipt(fakeId);
+      let refreshFailed = false;
+      try {
+        await reloadReports();
+      } catch (refreshError) {
+        console.error("Report was saved but the latest list could not be refreshed:", refreshError);
+        refreshFailed = true;
+      }
+      notify(
+        refreshFailed
+          ? "Report was saved, but the latest list could not be refreshed."
+          : "Report saved to Neon.",
+        refreshFailed,
+      );
+      setReceipt("REQ-" + result.id);
       setPage("receipt");
       setMedia([]);
       setForm({ ...form, title: "", description: "" });
 
     } catch (error) {
       console.error(error);
-      notify("ไม่สามารถเชื่อมต่อฐานข้อมูล Neon ได้", true);
+      notify(error.message || "Could not save the report to Neon.", true);
     }
   };
 

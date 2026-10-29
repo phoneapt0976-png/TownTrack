@@ -27,6 +27,42 @@ const valid = (d) =>
     (i) => i.id && Array.isArray(i.history) && Number.isInteger(i.revision),
   );
 
+function mapReport(report) {
+  const at = report.created_at || new Date().toISOString();
+  return {
+    id: `REQ-${report.id}`,
+    title: report.title || "แจ้งปัญหาทั่วไป",
+    description: report.description || "",
+    place: report.location || "ไม่ระบุสถานที่",
+    category: "ทั่วไป",
+    status: "NEW",
+    priority: "normal",
+    reportedBy: report.citizen_id || CURRENT_CITIZEN,
+    reporterName: "ประชาชน",
+    phone: "",
+    followers: [],
+    voters: [],
+    votes: 1,
+    updatedAt: at,
+    createdAt: at,
+    media: [],
+    satisfaction: [],
+    revision: 1,
+    location: USER_LOCATION,
+    history: [
+      {
+        id: `report-${report.id}`,
+        at,
+        status: "NEW",
+        text: "รับคำร้องจากฐานข้อมูล Neon",
+        actorName: "ระบบ",
+      },
+    ],
+    reports: [],
+    decisions: [],
+  };
+}
+
 function restore() {
   const raw = localStorage.getItem(KEY);
   if (!raw) return { schema: 1, issues: [] };
@@ -159,54 +195,6 @@ export function Provider({ children }) {
   const [toast, setToast] = useState(null),
     [busy, setBusy] = useState(false);
 
-  useEffect(() => {
-    const fetchNeonToStore = async () => {
-      try {
-        const { neon } = await import('@neondatabase/serverless');
-        const sql = neon("postgresql://neondb_owner:npg_HmAiMfy2qU5N@ep-noisy-truth-b5sf63d2-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require");
-        
-        const rows = await sql`SELECT * FROM reports ORDER BY created_at DESC`;
-        
-        const neonIssues = rows.map((r) => ({
-          id: "REQ-" + r.id,
-          title: r.title || "แจ้งปัญหาทั่วไป",
-          description: r.description || "",
-          place: r.location || "ไม่ระบุสถานที่",
-          category: "ทั่วไป",
-          status: r.status || "NEW",
-          priority: "MEDIUM",
-          reportedBy: r.citizen_id || CURRENT_CITIZEN,
-          reporterName: "ประชาชน",
-          phone: "",
-          followers: [],
-          voters: [],
-          votes: 1,
-          updatedAt: r.created_at || new Date().toISOString(),
-          createdAt: r.created_at || new Date().toISOString(),
-          media: [],
-          satisfaction: [],
-          revision: 1,
-          location: USER_LOCATION || { lat: 14.0, lng: 100.0 }, 
-          history: [
-            { action: "CREATE", by: r.citizen_id || CURRENT_CITIZEN, at: r.created_at || new Date().toISOString() }
-          ]
-        }));
-
-        setDB((currentDb) => {
-          const existingIds = new Set((currentDb.issues || []).map(i => i.id));
-          const uniqueNeonIssues = neonIssues.filter(i => !existingIds.has(i.id));
-          return {
-            ...currentDb,
-            issues: [...uniqueNeonIssues, ...(currentDb.issues || [])]
-          };
-        });
-      } catch (err) {
-        console.error("Failed to sync Neon reports to store:", err);
-      }
-    };
-
-    fetchNeonToStore();
-  }, []);
 
   const setCitizenIdentity = useCallback((profile) => {
     if (!profile?.userId) {
@@ -261,6 +249,33 @@ export function Provider({ children }) {
       setToast({ message, error, id: crypto.randomUUID() }),
     [],
   );
+
+  const reloadReports = useCallback(async () => {
+    const response = await fetch("/api/reports");
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.error || "โหลดคำร้องจากฐานข้อมูลไม่สำเร็จ");
+    }
+    const issues = result.map(mapReport);
+    const updated = { ...restore(), issues };
+    localStorage.setItem(KEY, JSON.stringify(updated));
+    setDB(updated);
+    setLoadError("");
+    return issues;
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    reloadReports().catch((error) => {
+      if (!active) return;
+      console.error("Failed to load reports from Neon:", error);
+      setLoadError(error.message);
+      notify(error.message, true);
+    });
+    return () => {
+      active = false;
+    };
+  }, [notify, reloadReports]);
 
   useEffect(() => {
     try {
@@ -349,6 +364,7 @@ export function Provider({ children }) {
         busy,
         toast,
         loadError,
+        reloadReports,
         people: PEOPLE,
       }}
     >

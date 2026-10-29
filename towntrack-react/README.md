@@ -11,6 +11,8 @@ npm --prefix ./towntrack-react ci
 npm run dev -- --port 8770
 ```
 
+ถ้าพอร์ตที่ระบุถูกใช้งานอยู่ เซิร์ฟเวอร์จะลองพอร์ตถัดไปอัตโนมัติ และแสดง URL ที่ใช้จริงใน Terminal
+
 เปิด `http://localhost:8770/` เพื่อเลือกบทบาท หรือเปิดหน้าแต่ละบทบาทโดยตรง:
 
 - `/citizen` — ประชาชน
@@ -19,7 +21,7 @@ npm run dev -- --port 8770
 - `/worker` — ผู้ลงพื้นที่
 - `/authority` — ผู้มีอำนาจ / ผู้บริหาร
 
-แต่ละ URL เป็นพื้นที่ทำงานแยกกัน ไม่มีแถบสลับบทบาทด้านบน ข้อมูลตัวอย่างยังใช้ฐานข้อมูลในเบราว์เซอร์ร่วมกัน และบัญชีทดลองทีม A/B เลือกได้จากหน้า desktop ของบทบาทที่เกี่ยวข้อง
+แต่ละ URL เป็นพื้นที่ทำงานแยกกัน ไม่มีแถบสลับบทบาทด้านบน หน้าเว็บโหลดคำร้อง 50 รายการล่าสุดจาก Neon และคำร้องใหม่บันทึกกลับไปยัง Neon ส่วนบัญชีทดลองทีม A/B เลือกได้จากหน้า desktop ของบทบาทที่เกี่ยวข้อง
 
 ```sh
 npm test
@@ -28,6 +30,22 @@ npm run test:e2e
 npm run build
 npm run preview -- --port 8771
 ```
+
+## นำเข้าข้อมูลสาธิตไป Neon (development)
+
+คัดลอก `.env.example` เป็น `.env.local` แล้วใส่ connection string ของ Neon development ใน `DATABASE_URL` (อย่าใช้ URL ที่มีสิทธิ์ production หรือเผยแพร่ URL นี้เป็นตัวแปร `VITE_`) จากนั้นรันจากโฟลเดอร์โปรเจกต์หรือ workspace root:
+
+```sh
+npm run db:seed:demo
+```
+
+สคริปต์เพิ่มข้อมูลสาธิต 50 รายการลงตาราง `reports` โดยใช้คอลัมน์ `title`, `description`, `location` และ `citizen_id` หัวข้อจะขึ้นต้น `[ข้อมูลจำลอง]` และ `citizen_id` จะขึ้นต้น `towntrack-mock:` เพื่อแยกจากคำร้องจริง การรันซ้ำจะข้ามรายการเดิม
+
+ตั้งค่า `DATABASE_URL` ใน `.env.local` ก่อนเริ่มเว็บด้วย `npm run dev` หรือรัน production build ด้วย `npm run build` แล้วเปิดเซิร์ฟเวอร์ด้วย `npm start` (หรือ `npm run preview`) API ใช้ตาราง `reports` ที่มีคอลัมน์ `id`, `title`, `description`, `location`, `citizen_id` และ `created_at` หากนำไป deploy ต้อง deploy Node server นี้พร้อมกำหนด `DATABASE_URL` ใน environment ของ server
+
+### Deploy บน Vercel
+
+ตั้งค่า Root Directory ของ Vercel เป็น `towntrack-react` แล้วเพิ่ม Environment Variable ชื่อ `DATABASE_URL` ด้วย connection string ของ Neon ใน Vercel Project Settings → Environment Variables จากนั้น redeploy production deployment ล่าสุด ไฟล์ `api/reports.js` ให้ endpoint `/api/reports` สำหรับ Vercel โดยตรง
 
 ## เปิด build โดยไม่ติดตั้ง Node
 

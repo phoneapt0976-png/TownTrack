@@ -4,9 +4,11 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host 127.0.0.1",
+    "dev": "node server.mjs",
     "build": "vite build && node scripts/static-aliases.mjs",
-    "preview": "vite preview --host 127.0.0.1",
+    "preview": "node server.mjs --production",
+    "start": "node server.mjs --production",
+    "db:seed:demo": "node --env-file=.env.local scripts/seed-demo-neon.mjs",
     "cap:add:ios": "cap add ios",
     "cap:add:android": "cap add android",
     "cap:sync": "npm run build && cap sync",

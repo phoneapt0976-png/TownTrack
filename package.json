@@ -5,6 +5,8 @@
     "dev": "npm --prefix ./towntrack-react run dev --",
     "build": "npm --prefix ./towntrack-react run build",
     "preview": "npm --prefix ./towntrack-react run preview --",
+    "start": "npm --prefix ./towntrack-react run start --",
+    "db:seed:demo": "npm --prefix ./towntrack-react run db:seed:demo",
     "test": "npm --prefix ./towntrack-react test",
     "test:e2e": "npm --prefix ./towntrack-react run test:e2e",
     "cap:add:ios": "npm --prefix ./towntrack-react run cap:add:ios",
