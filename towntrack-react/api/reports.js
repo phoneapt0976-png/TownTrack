@@ -59,13 +59,14 @@ export default async function reports(req, res) {
       return;
     }
 
-    const [report] = await sql`
-      WITH inserted AS (
-      INSERT INTO reports (title, description, location, citizen_id)
-      VALUES (${title}, ${description}, ${location}, ${citizenId})
-      RETURNING id, title, description, location, citizen_id, created_at
-      ),
-      pruned AS (
+    const [, [report]] = await sql.transaction([
+      sql`SELECT pg_advisory_xact_lock(740257211)`,
+      sql`
+        INSERT INTO reports (title, description, location, citizen_id)
+        VALUES (${title}, ${description}, ${location}, ${citizenId})
+        RETURNING id, title, description, location, citizen_id, created_at
+      `,
+      sql`
         DELETE FROM reports
         WHERE id IN (
           SELECT id
@@ -73,10 +74,8 @@ export default async function reports(req, res) {
           ORDER BY created_at DESC, id DESC
           OFFSET ${REPORT_LIMIT}
         )
-        RETURNING id
-      )
-      SELECT * FROM inserted
-    `;
+      `,
+    ]);
     send(res, 201, report);
   } catch (error) {
     console.error("Vercel reports API failed:", error);

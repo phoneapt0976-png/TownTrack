@@ -6,8 +6,6 @@ import React, {
   useCallback,
   useRef,
 } from "react";
-// 🟢 นำเข้าแพ็กเกจ LINE LIFF
-import liff from "@line/liff"; 
 import {
   transition,
   PEOPLE,
@@ -209,30 +207,6 @@ export function Provider({ children }) {
     localStorage.setItem(CITIZEN_KEY, JSON.stringify(identity));
     setCitizenIdentityState(identity);
   }, []);
-
-  // 🟢 เริ่มต้นระบบ LINE LIFF 
-  useEffect(() => {
-    const initLiff = async () => {
-      try {
-        await liff.init({ liffId: "2012227993-tgksP03U" });
-        
-        // ถ้ายังไม่ได้ล็อกอิน ให้บังคับเด้งหน้าล็อกอิน LINE ก่อน
-        if (!liff.isLoggedIn()) {
-          liff.login();
-        } else {
-          // ถ้าล็อกอินแล้ว ดึงข้อมูลได้เลย
-          const profile = await liff.getProfile();
-          setCitizenIdentity(profile);
-        }
-      } catch (err) {
-        console.error("LIFF Initialization failed", err);
-      }
-    };
-    
-    if (role === "citizen") {
-      initLiff();
-    }
-  }, [role, setCitizenIdentity]);
 
   const actor = {
     role,
