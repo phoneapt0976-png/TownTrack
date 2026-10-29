@@ -487,12 +487,13 @@ export default function PublicDashboard({ onReport, onTrack, onOpen, geo }) {
               </span>
             </h2>
           </div>
-          <span className="area-sort-note"><ListFilter size={15} />{{
+          <span className="area-sort-note" title="ข้อมูลจาก Neon และอัปเดตอัตโนมัติทุก 15 วินาที">
+            <ListFilter size={15} />{{
             latest: "เรียงตามวันที่แจ้ง",
             "votes-desc": "คนโหวตเยอะสุด",
             "votes-asc": "คนโหวตน้อยสุด",
             mine: "เรื่องที่เราเป็นคนแจ้ง",
-          }[sort]}</span>
+          }[sort]} · ข้อมูลจาก Neon อัปเดตทุก 15 วินาที</span>
         </div>
         {!filtered.length && (
           <Empty

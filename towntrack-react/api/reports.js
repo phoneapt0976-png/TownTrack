@@ -41,6 +41,7 @@ export default async function reports(req, res) {
     await ensureVotesTable(sql);
 
     if (req.method === "GET") {
+      res.setHeader("Cache-Control", "no-store, max-age=0");
       const citizenId = String(req.query?.citizen_id || "").slice(0, 200);
       const rows = await sql`
         SELECT

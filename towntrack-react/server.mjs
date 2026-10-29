@@ -76,6 +76,7 @@ async function handleReports(req, res) {
   await ensureVotesTable();
 
   if (req.method === "GET") {
+    res.setHeader("Cache-Control", "no-store, max-age=0");
     const citizenId = new URL(req.url, "http://localhost").searchParams
       .get("citizen_id")
       ?.slice(0, 200) || "";

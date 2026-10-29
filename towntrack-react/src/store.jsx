@@ -16,6 +16,7 @@ import {
 
 const KEY = "towntrack-react-v4";
 const CITIZEN_KEY = "towntrack-line-citizen-v1";
+const REPORT_REFRESH_INTERVAL_MS = 15_000;
 const Store = createContext(null);
 
 const valid = (d) =>
@@ -160,6 +161,7 @@ async function encodeUploads(payload) {
 
 export function Provider({ children }) {
   const actionLock = useRef(false);
+  const reportsRequest = useRef({ actorId: "", promise: null, sequence: 0 });
   const [loadError, setLoadError] = useState("");
   const [db, setDB] = useState(() => {
     try {
@@ -226,30 +228,78 @@ export function Provider({ children }) {
   );
 
   const reloadReports = useCallback(async () => {
-    const params = new URLSearchParams({ citizen_id: actor.id });
-    const response = await fetch(`/api/reports?${params}`);
-    const result = await response.json();
-    if (!response.ok) {
-      throw new Error(result.error || "โหลดคำร้องจากฐานข้อมูลไม่สำเร็จ");
+    if (
+      reportsRequest.current.promise &&
+      reportsRequest.current.actorId === actor.id
+    ) {
+      return reportsRequest.current.promise;
     }
-    const issues = result.map((report) => mapReport(report, actor.id));
-    const updated = { ...restore(), issues };
-    localStorage.setItem(KEY, JSON.stringify(updated));
-    setDB(updated);
-    setLoadError("");
-    return issues;
+    const sequence = reportsRequest.current.sequence + 1;
+    reportsRequest.current = { actorId: actor.id, promise: null, sequence };
+    const request = (async () => {
+      const params = new URLSearchParams({ citizen_id: actor.id });
+      const response = await fetch(`/api/reports?${params}`, {
+        cache: "no-store",
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "โหลดคำร้องจากฐานข้อมูลไม่สำเร็จ");
+      }
+      if (!Array.isArray(result)) {
+        throw new Error("ข้อมูลคำร้องจากฐานข้อมูลไม่ถูกต้อง");
+      }
+      const issues = result.map((report) => mapReport(report, actor.id));
+      if (reportsRequest.current.sequence !== sequence) return issues;
+      const updated = { ...restore(), issues };
+      localStorage.setItem(KEY, JSON.stringify(updated));
+      setDB(updated);
+      setLoadError("");
+      return issues;
+    })();
+    reportsRequest.current.promise = request;
+    try {
+      return await request;
+    } finally {
+      if (reportsRequest.current.sequence === sequence) {
+        reportsRequest.current.promise = null;
+      }
+    }
   }, [actor.id]);
 
   useEffect(() => {
     let active = true;
-    reloadReports().catch((error) => {
-      if (!active) return;
-      console.error("Failed to load reports from Neon:", error);
-      setLoadError(error.message);
-      notify(error.message, true);
-    });
+    let loading = false;
+    let lastError = "";
+    const refresh = async () => {
+      if (!active || loading || document.visibilityState === "hidden") return;
+      loading = true;
+      try {
+        await reloadReports();
+        lastError = "";
+      } catch (error) {
+        if (!active) return;
+        console.error("Failed to refresh reports from Neon:", error);
+        setLoadError(error.message);
+        if (lastError !== error.message) notify(error.message, true);
+        lastError = error.message;
+      } finally {
+        loading = false;
+      }
+    };
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    refresh();
+    const timer = window.setInterval(refresh, REPORT_REFRESH_INTERVAL_MS);
+    window.addEventListener("focus", refreshWhenVisible);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+    window.addEventListener("online", refreshWhenVisible);
     return () => {
       active = false;
+      window.clearInterval(timer);
+      window.removeEventListener("focus", refreshWhenVisible);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+      window.removeEventListener("online", refreshWhenVisible);
     };
   }, [notify, reloadReports]);
 
