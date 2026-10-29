@@ -623,81 +623,87 @@ export default function Citizen({ navOpen, setNavOpen }) {
                   <br />
                   เพื่อช่วยลดการแจ้งซ้ำ
                 </p>
-                <div className="gps-box">
-                  <LocateFixed size={18} />
-                  <div>
-                    <strong>
-                      {geo.source === "gps" &&
-                      distance(form.location, geo.location) < 1
-                        ? "พิกัดจาก GPS ของคุณ"
-                        : distance(form.location, USER_LOCATION) > 1
-                          ? "จุดเกิดเหตุที่เลือกบนแผนที่"
-                          : "จุดอ้างอิงเทศบาล · ยังไม่ได้ใช้ GPS"}
-                    </strong>
-                    <small>
-                      {form.location.lat.toFixed(6)},{" "}
-                      {form.location.lng.toFixed(6)}
-                      {geo.accuracy
-                        ? " · ความแม่นยำประมาณ " +
-                          Math.round(geo.accuracy) +
-                          " ม."
-                        : ""}
-                    </small>
-                  </div>
-                </div>
-                <Button
-                  variant="secondary"
-                  className="w-full mb-3"
-                  disabled={geo.pending}
-                  onClick={locate}
-                >
-                  <LocateFixed size={15} />
-                  {geo.pending ? "กำลังหาตำแหน่ง…" : "ใช้ GPS ของฉัน"}
-                </Button>
-                {geo.error && (
-                  <p className="gps-error" role="alert">
-                    {geo.error}
-                  </p>
-                )}
-                <GeoMap
-                  issues={near}
-                  center={form.location}
-                  radar
-                  onSelect={open}
-                  onPick={(p) => update("location", p)}
-                />
-                <div className="section-title mt-5">
-                  <strong>พบ {near.length} ปัญหาใกล้คุณ</strong>
-                  <span className="muted text-xs">ภายใน 100 เมตร</span>
-                </div>
-                {near.length ? (
-                  near.map((i) => (
-                    <article className="nearby-card" key={i.id}>
-                      <div className="flex justify-between items-center">
-                        <span className="case-id">{i.id}</span>
-                        <span className="distance-label">
-                          <Navigation size={11} />
-                          {Math.round(distance(i.location, form.location))} เมตร
-                        </span>
+                <div className="nearby-workspace">
+                  <section className="nearby-location-panel" aria-label="ตำแหน่งเกิดเหตุ">
+                    <div className="gps-box">
+                      <LocateFixed size={18} />
+                      <div>
+                        <strong>
+                          {geo.source === "gps" &&
+                          distance(form.location, geo.location) < 1
+                            ? "พิกัดจาก GPS ของคุณ"
+                            : distance(form.location, USER_LOCATION) > 1
+                              ? "จุดเกิดเหตุที่เลือกบนแผนที่"
+                              : "จุดอ้างอิงเทศบาล · ยังไม่ได้ใช้ GPS"}
+                        </strong>
+                        <small>
+                          {form.location.lat.toFixed(6)},{" "}
+                          {form.location.lng.toFixed(6)}
+                          {geo.accuracy
+                            ? " · ความแม่นยำประมาณ " +
+                              Math.round(geo.accuracy) +
+                              " ม."
+                            : ""}
+                        </small>
                       </div>
-                      <h3>{i.title}</h3>
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        <span className="category-tag">{i.category}</span>
-                        <Badge issue={i} />
-                      </div>
-                      <VoteFollow issue={i} />
-                    </article>
-                  ))
-                ) : (
-                  <Empty
-                    title="ยังไม่พบปัญหาใกล้จุดนี้"
-                    text="คุณสามารถแจ้งคำร้องใหม่ได้"
-                  />
-                )}
-                <Button className="w-full mt-4" onClick={() => go("form")}>
-                  ไม่พบเรื่องนี้? แจ้งปัญหาใหม่
-                  <ArrowRight size={16} />
-                </Button>
+                    </div>
+                    <Button
+                      variant="secondary"
+                      className="w-full mb-3"
+                      disabled={geo.pending}
+                      onClick={locate}
+                    >
+                      <LocateFixed size={15} />
+                      {geo.pending ? "กำลังหาตำแหน่ง…" : "ใช้ GPS ของฉัน"}
+                    </Button>
+                    {geo.error && (
+                      <p className="gps-error" role="alert">
+                        {geo.error}
+                      </p>
+                    )}
+                    <GeoMap
+                      issues={near}
+                      center={form.location}
+                      radar
+                      onSelect={open}
+                      onPick={(p) => update("location", p)}
+                    />
+                  </section>
+                  <section className="nearby-results-panel" aria-label="ปัญหาใกล้เคียง">
+                    <div className="section-title mt-5">
+                      <strong>พบ {near.length} ปัญหาใกล้คุณ</strong>
+                      <span className="muted text-xs">ภายใน 100 เมตร</span>
+                    </div>
+                    {near.length ? (
+                      near.map((i) => (
+                        <article className="nearby-card" key={i.id}>
+                          <div className="flex justify-between items-center">
+                            <span className="case-id">{i.id}</span>
+                            <span className="distance-label">
+                              <Navigation size={11} />
+                              {Math.round(distance(i.location, form.location))} เมตร
+                            </span>
+                          </div>
+                          <h3>{i.title}</h3>
+                          <div className="flex flex-wrap gap-2 mb-2">
+                            <span className="category-tag">{i.category}</span>
+                            <Badge issue={i} />
+                          </div>
+                          <VoteFollow issue={i} />
+                        </article>
+                      ))
+                    ) : (
+                      <Empty
+                        title="ยังไม่พบปัญหาใกล้จุดนี้"
+                        text="คุณสามารถแจ้งคำร้องใหม่ได้"
+                      />
+                    )}
+                    <Button className="w-full mt-4" onClick={() => go("form")}>
+                      ไม่พบเรื่องนี้? แจ้งปัญหาใหม่
+                      <ArrowRight size={16} />
+                    </Button>
+                  </section>
+                </div>
               </>
             )}
             {page === "form" && (

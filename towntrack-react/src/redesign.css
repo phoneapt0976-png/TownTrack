@@ -388,8 +388,13 @@ h1, h2, h3 { color: var(--ui-ink); text-wrap: balance; }
 .citizen-body .gps-box { border-color: var(--ui-line); border-radius: 13px; background: #f5fafc; }
 .citizen-body .gps-box strong { color: var(--ui-ink); }
 .citizen-body .phone-frame, .citizen-body .card { box-shadow: none; }
+.citizen-body .geo-map { height: clamp(280px, 42vh, 480px); min-height: 280px; }
 .citizen-body .form-stack { width: min(100%, 900px); margin: 0 auto; }
 .citizen-body .form-stack > .geo-map, .citizen-body .geo-map-wrap { border-radius: 16px; overflow: hidden; }
+.nearby-workspace { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+.nearby-location-panel, .nearby-results-panel { min-width: 0; }
+.nearby-location-panel .geo-map-wrap { margin-top: 12px; }
+.nearby-results-panel .section-title { margin-top: 0; }
 .citizen-body .field > span:first-child { color: #355b73; font-size: 14px; }
 .citizen-body .field input, .citizen-body .field select, .citizen-body .field textarea { min-height: 48px; border: 1px solid #d1e0e9; border-radius: 11px; color: var(--ui-ink); background: #fff; font-size: 16px; }
 .citizen-body .field textarea { min-height: 120px; }
@@ -1149,7 +1154,7 @@ h1, h2, h3 { color: var(--ui-ink); text-wrap: balance; }
   padding: 26px clamp(14px, 3vw, 42px) 36px;
 }
 .role-page-citizen .citizen-portal-shell .public-dashboard { width: 100%; max-width: none; padding-bottom: 32px; }
-.role-page-citizen .phone-frame { width: 100%; min-height: 0; }
+.role-page-citizen .phone-frame { width: 100%; min-width: 0; min-height: 0; flex: 1 1 auto; }
 
 @media (max-width: 760px) {
   .role-page-citizen { --citizen-header-offset: calc(60px + env(safe-area-inset-top)); }
@@ -1301,6 +1306,12 @@ h1, h2, h3 { color: var(--ui-ink); text-wrap: balance; }
 .satisfaction-staff-summary strong { color: #174b69; }
 .satisfaction-staff-summary p { margin: 4px 0 0; color: #456a80; }
 .satisfaction-staff-summary blockquote { margin: 10px 0 0; padding-left: 12px; border-left: 3px solid #8dbdd5; color: #385e74; line-height: 1.65; overflow-wrap: anywhere; }
+
+@media (min-width: 900px) {
+  .role-page-citizen .citizen-wrap { max-width: 1480px; }
+  .nearby-workspace { grid-template-columns: minmax(320px, .9fr) minmax(0, 1.1fr); gap: 30px; }
+  .nearby-location-panel .geo-map { height: clamp(360px, 48vh, 520px); }
+}
 @media (max-width: 520px) {
   .satisfaction-stars { gap: 5px; }
   .satisfaction-stars label { min-height: 58px; }
