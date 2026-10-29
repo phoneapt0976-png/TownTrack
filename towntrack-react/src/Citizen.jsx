@@ -392,6 +392,7 @@ export default function Citizen({ navOpen, setNavOpen }) {
   const [page, setPage] = useState("portal"),
     [trackTab, setTrackTab] = useState("mine"),
     [trackStatus, setTrackStatus] = useState("all"),
+    [nearPage, setNearPage] = useState(1),
     [selected, setSelected] = useState(null),
     [detailFrom, setDetailFrom] = useState("portal"),
     [search, setSearch] = useState(""),
@@ -436,6 +437,14 @@ export default function Citizen({ navOpen, setNavOpen }) {
   }, [page]);
   const issue = db.issues.find((i) => i.id === selected);
   const near = nearby(db.issues, form.location);
+  const nearPages = Math.max(1, Math.ceil(near.length / 5));
+  const visibleNearby = near.slice((nearPage - 1) * 5, nearPage * 5);
+  useEffect(() => {
+    setNearPage(1);
+  }, [form.location.lat, form.location.lng]);
+  useEffect(() => {
+    if (nearPage > nearPages) setNearPage(nearPages);
+  }, [nearPage, nearPages]);
   const go = (p) => {
     setPage(p);
     setSelected(null);
@@ -586,7 +595,7 @@ export default function Citizen({ navOpen, setNavOpen }) {
           {!['portal', 'emergency'].includes(page) && (
             <nav className="citizen-flow" aria-label="ขั้นตอนแจ้งและติดตามปัญหา">
               {[
-                ["nearby", "เช็กเรื่องซ้ำ"],
+                ["nearby", "ยืนยันตำแหน่ง"],
                 ["form", "แจ้งปัญหา"],
                 ["receipt", "ติดตาม/แก้ไข"],
               ].map(([step, label], index) => {
@@ -622,11 +631,9 @@ export default function Citizen({ navOpen, setNavOpen }) {
                   กลับหน้าหลัก
                 </button>
                 <span className="eyebrow">ก่อนแจ้งปัญหา</span>
-                <h1>ตรวจปัญหาใกล้จุดเกิดเหตุ</h1>
+                <h1>ยืนยันตำแหน่ง</h1>
                 <p className="muted">
-                  ดูเรื่องในระยะ 100 เมตร
-                  <br />
-                  เพื่อช่วยลดการแจ้งซ้ำ
+                  เลือกจุดเกิดเหตุบนแผนที่ แล้วตรวจดูปัญหาใกล้เคียงในระยะ 100 เมตร
                 </p>
                 <div className="nearby-workspace">
                   <section className="nearby-location-panel" aria-label="ตำแหน่งเกิดเหตุ">
@@ -680,7 +687,7 @@ export default function Citizen({ navOpen, setNavOpen }) {
                       <span className="muted text-xs">ภายใน 100 เมตร</span>
                     </div>
                     {near.length ? (
-                      near.map((i) => (
+                      visibleNearby.map((i) => (
                         <article className="nearby-card" key={i.id}>
                           <div className="flex justify-between items-center">
                             <span className="case-id">{i.id}</span>
@@ -702,6 +709,33 @@ export default function Citizen({ navOpen, setNavOpen }) {
                         title="ยังไม่พบปัญหาใกล้จุดนี้"
                         text="คุณสามารถแจ้งคำร้องใหม่ได้"
                       />
+                    )}
+                    {near.length > 5 && (
+                      <nav className="nearby-pagination" aria-label="หน้ารายการปัญหาใกล้เคียง">
+                        <button
+                          type="button"
+                          aria-label="หน้าก่อนหน้า"
+                          disabled={nearPage === 1}
+                          onClick={() => setNearPage((current) => Math.max(1, current - 1))}
+                        >
+                          <ArrowLeft size={16} />
+                          ก่อนหน้า 5 เรื่อง
+                        </button>
+                        <span>
+                          {getLanguage() === "en"
+                            ? `Showing ${(nearPage - 1) * 5 + 1}–${Math.min(nearPage * 5, near.length)} of ${near.length} issues`
+                            : `แสดง ${(nearPage - 1) * 5 + 1}–${Math.min(nearPage * 5, near.length)} จาก ${near.length} เรื่อง`}
+                        </span>
+                        <button
+                          type="button"
+                          aria-label="หน้าถัดไป"
+                          disabled={nearPage === nearPages}
+                          onClick={() => setNearPage((current) => Math.min(nearPages, current + 1))}
+                        >
+                          ถัดไป 5 เรื่อง
+                          <ArrowRight size={16} />
+                        </button>
+                      </nav>
                     )}
                     <Button className="w-full mt-4" onClick={() => go("form")}>
                       ไม่พบเรื่องนี้? แจ้งปัญหาใหม่
@@ -759,7 +793,7 @@ export default function Citizen({ navOpen, setNavOpen }) {
                   </Field>
                   <Field
                     label="สถานที่เกิดเหตุ"
-                    hint={`พิกัดที่เลือกไว้หน้าเช็กเรื่องซ้ำ: ${form.location.lat.toFixed(6)}, ${form.location.lng.toFixed(6)} · หากต้องการเปลี่ยนตำแหน่ง ให้ย้อนกลับไปเลือกบนแผนที่`}
+                    hint={`พิกัดที่เลือกไว้หน้ายืนยันตำแหน่ง: ${form.location.lat.toFixed(6)}, ${form.location.lng.toFixed(6)} · หากต้องการเปลี่ยนตำแหน่ง ให้ย้อนกลับไปเลือกบนแผนที่`}
                     required
                   >
                     <input

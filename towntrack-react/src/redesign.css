@@ -395,6 +395,10 @@ h1, h2, h3 { color: var(--ui-ink); text-wrap: balance; }
 .nearby-location-panel, .nearby-results-panel { min-width: 0; }
 .nearby-location-panel .geo-map-wrap { margin-top: 12px; }
 .nearby-results-panel .section-title { margin-top: 0; }
+.nearby-pagination { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 14px; }
+.nearby-pagination button { min-height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 8px 12px; border: 1px solid var(--ui-line); border-radius: 10px; color: var(--ui-deep); background: #fff; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.nearby-pagination button:disabled { color: #91a2ae; background: #f5f8fa; cursor: not-allowed; }
+.nearby-pagination span { color: var(--ui-muted); font-size: 12px; text-align: center; }
 .citizen-body .field > span:first-child { color: #355b73; font-size: 14px; }
 .citizen-body .field input, .citizen-body .field select, .citizen-body .field textarea { min-height: 48px; border: 1px solid #d1e0e9; border-radius: 11px; color: var(--ui-ink); background: #fff; font-size: 16px; }
 .citizen-body .field textarea { min-height: 120px; }
@@ -860,6 +864,12 @@ h1, h2, h3 { color: var(--ui-ink); text-wrap: balance; }
   .area-case-visual { width: 62px; height: 62px; }
   .area-case-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .area-case-actions .area-open-case { grid-column: 1 / -1; }
+}
+
+@media (max-width: 480px) {
+  .nearby-pagination { gap: 6px; }
+  .nearby-pagination button { min-width: 0; padding: 7px; font-size: 11px; }
+  .nearby-pagination span { font-size: 11px; }
 }
 
 /* Shared finishing: readable copy and consistently centered actions across roles. */
